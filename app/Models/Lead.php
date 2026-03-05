@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Lead extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'company_name',
         'contact_name',
@@ -29,5 +30,10 @@ class Lead extends Model
     public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function followUps()
+    {
+        return $this->hasMany(LeadFollowUp::class);
     }
 }

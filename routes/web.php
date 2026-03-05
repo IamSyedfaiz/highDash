@@ -27,11 +27,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Lead Management
     Route::resource('leads', LeadController::class);
     Route::post('leads/{lead}/quick-update', [LeadController::class, 'quickUpdate'])->name('leads.quickUpdate');
+    Route::post('leads/{lead}/followups', [LeadController::class, 'storeFollowUp'])->name('leads.followups.store');
     Route::post('leads/import', [LeadImportExportController::class, 'import'])->name('leads.import');
     Route::get('leads/export/download', [LeadImportExportController::class, 'export'])->name('leads.export');
 
     // Attendance & Leaves
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/export', [AttendanceController::class, 'export'])->name('attendance.export');
     Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
     Route::resource('leaves', LeaveRequestController::class);
 

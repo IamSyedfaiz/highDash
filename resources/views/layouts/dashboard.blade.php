@@ -85,7 +85,8 @@
                                 <div class="flex-1 truncate">
                                     <h4 class="truncate font-semibold">{{ Auth::user()->name }}</h4>
                                     <p class="text-xs text-slate-500 font-normal truncate uppercase">
-                                        {{ Auth::user()->roles->first()->name ?? 'User' }}</p>
+                                        {{ Auth::user()->roles->first()->name ?? 'User' }}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -161,6 +162,30 @@
 
             <main class="py-10">
                 <div class="px-4 sm:px-6 lg:px-8">
+                    @if(session('success'))
+                        <div
+                            class="mb-8 p-4 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                {{ session('success') }}
+                            </div>
+                        </div>
+                    @endif
+                    @if(session('error'))
+                        <div
+                            class="mb-8 p-4 bg-rose-100 border border-rose-200 text-rose-800 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                {{ session('error') }}
+                            </div>
+                        </div>
+                    @endif
                     @yield('content')
                 </div>
             </main>

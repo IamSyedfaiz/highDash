@@ -14,51 +14,65 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        if ($user->isAdmin() || $user->hasRole('manager')) {
-            return $this->adminDashboard();
+        try {
+            $user = Auth::user();
+            if ($user->isAdmin() || $user->hasRole('manager')) {
+                return $this->adminDashboard();
+            }
+            return $this->userDashboard();
+        } catch (\Exception $e) {
+            // If something fails, at least show a clean error view or redirect
+            return view('errors.500'); // Or custom error handling
         }
-        return $this->userDashboard();
     }
 
     private function adminDashboard()
     {
-        $today = now('Asia/Kolkata')->toDateString();
-        $data = [
-            'totalUsers' => User::count(),
-            'todayAttendance' => Attendance::where('date', $today)->count(),
-            'pendingLeaves' => LeaveRequest::where('status', 'pending')->count(),
-            'totalLeads' => Lead::count(),
-            'unassignedLeads' => Lead::whereNull('assigned_to')->count(),
-            'droppedLeads' => Lead::where('status', 'Drop')->count(),
-            'recentActivities' => ActivityLog::with('user')->latest()->take(10)->get(),
-            'leadStats' => Lead::selectRaw('status, count(*) as count')->groupBy('status')->get(),
-            'topAgents' => User::whereHas('roles', fn($q) => $q->where('slug', 'calling'))
-                ->withCount(['leads' => fn($q) => $q->where('status', 'Existing')])
-                ->orderBy('leads_count', 'desc')->take(5)->get(),
-        ];
-        return view('admin.dashboard', $data);
+        try {
+            $today = now('Asia/Kolkata')->toDateString();
+            $data = [
+                'totalUsers' => User::count(),
+                'todayAttendance' => Attendance::where('date', $today)->count(),
+                'pendingLeaves' => LeaveRequest::where('status', 'pending')->count(),
+                'totalLeads' => Lead::count(),
+                'unassignedLeads' => Lead::whereNull('assigned_to')->count(),
+                'droppedLeads' => Lead::where('status', 'Drop')->count(),
+                'recentActivities' => ActivityLog::with('user')->latest()->take(10)->get(),
+                'leadStats' => Lead::selectRaw('status, count(*) as count')->groupBy('status')->get(),
+                'topAgents' => User::whereHas('roles', fn($q) => $q->where('slug', 'calling'))
+                    ->withCount(['leads' => fn($q) => $q->where('status', 'Existing')])
+                    ->orderBy('leads_count', 'desc')->take(5)->get(),
+            ];
+            return view('admin.dashboard', $data);
+        } catch (\Exception $e) {
+            return view('admin.dashboard', ['error' => 'Some dashboard components failed to load.']);
+        }
     }
 
     private function userDashboard()
     {
-        $user = Auth::user();
-        $now = now('Asia/Kolkata');
+        try {
+            $user = Auth::user()->load('currentSession');
+            $now = now('Asia/Kolkata');
 
-        $data = [
-            'attendance' => Attendance::where('user_id', $user->id)
-                ->where('date', '>=', $now->startOfMonth()->toDateString())
-                ->get(),
-            'leaveRequests' => LeaveRequest::where('user_id', $user->id)->latest()->take(5)->get(),
-            'assignedLeadsCount' => $user->leads()->count(),
-            'newLeadsCount' => $user->leads()->where('status', 'New Lead')->count(),
-            'convertedLeadsCount' => $user->leads()->where('status', 'Existing')->count(),
-            'stats' => [
-                'present' => Attendance::where('user_id', $user->id)->where('status', 'present')->count(),
-                'absent' => Attendance::where('user_id', $user->id)->where('status', 'absent')->count(),
-                'leave' => Attendance::where('user_id', $user->id)->where('status', 'on_leave')->count(),
-            ]
-        ];
-        return view('user.dashboard', $data);
+            $data = [
+                'user' => $user,
+                'attendance' => Attendance::where('user_id', $user->id)
+                    ->where('date', '>=', $now->startOfMonth()->toDateString())
+                    ->get(),
+                'leaveRequests' => $user->leaveRequests()->latest()->take(5)->get(),
+                'assignedLeadsCount' => $user->leads()->count(),
+                'newLeadsCount' => $user->leads()->where('status', 'New Lead')->count(),
+                'convertedLeadsCount' => $user->leads()->where('status', 'Existing')->count(),
+                'stats' => [
+                    'present' => Attendance::where('user_id', $user->id)->where('status', 'present')->count(),
+                    'absent' => Attendance::where('user_id', $user->id)->where('status', 'absent')->count(),
+                    'leave' => Attendance::where('user_id', $user->id)->where('status', 'on_leave')->count(),
+                ]
+            ];
+            return view('user.dashboard', $data);
+        } catch (\Exception $e) {
+            return view('user.dashboard', ['error' => 'Unable to load your dashboard data.']);
+        }
     }
 }

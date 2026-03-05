@@ -92,4 +92,9 @@ class User extends Authenticatable
     {
         return $this->roles->flatMap->permissions->contains('slug', $permission);
     }
+
+    public function currentSession()
+    {
+        return $this->hasOne(LoginSession::class)->whereNull('logout_at')->latest('login_at');
+    }
 }

@@ -12,29 +12,39 @@ class LeadAllocationController extends Controller
 {
     public function index()
     {
-        $unassignedLeads = Lead::whereNull('assigned_to')->whereNot('status', 'Drop')->get();
-        $callingUsers = User::whereHas('roles', function ($q) {
-            $q->where('slug', 'calling');
-        })->get();
+        try {
+            $unassignedLeads = Lead::whereNull('assigned_to')->whereNot('status', 'Drop')->get();
+            $callingUsers = User::whereHas('roles', function ($q) {
+                $q->where('slug', 'calling');
+            })->get();
 
-        $recentlyAssigned = Lead::whereNotNull('assigned_to')->with('assignedUser')->latest('updated_at')->take(10)->get();
+            $recentlyAssigned = Lead::whereNotNull('assigned_to')->with('assignedUser')->latest('updated_at')->take(10)->get();
 
-        return view('admin.leads.allocation', compact('unassignedLeads', 'callingUsers', 'recentlyAssigned'));
+            return view('admin.leads.allocation', compact('unassignedLeads', 'callingUsers', 'recentlyAssigned'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load lead allocation data.');
+        }
     }
 
     public function allocate(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'lead_ids' => 'required|array',
-            'lead_ids.*' => 'exists:leads,id',
-        ]);
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'lead_ids' => 'required|array',
+                'lead_ids.*' => 'exists:leads,id',
+            ]);
 
-        Lead::whereIn('id', $request->lead_ids)->update([
-            'assigned_to' => $request->user_id,
-            'status' => 'New Lead' // Reset status to active if it was generic
-        ]);
+            Lead::whereIn('id', $request->lead_ids)->update([
+                'assigned_to' => $request->user_id,
+                'status' => 'New Lead' // Reset status to active if it was generic
+            ]);
 
-        return back()->with('success', count($request->lead_ids) . ' leads allocated successfully.');
+            return back()->with('success', count($request->lead_ids) . ' leads allocated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Failed to allocate leads.');
+        }
     }
 }

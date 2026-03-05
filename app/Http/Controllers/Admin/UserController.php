@@ -14,69 +14,97 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->paginate(15);
-        return view('admin.users.index', compact('users'));
+        try {
+            $users = User::with('roles')->paginate(15);
+            return view('admin.users.index', compact('users'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load users list.');
+        }
     }
 
     public function create()
     {
-        $roles = Role::all();
-        return view('admin.users.create', compact('roles'));
+        try {
+            $roles = Role::all();
+            return view('admin.users.create', compact('roles'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load user creation form.');
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'roles' => ['required', 'array'],
-        ]);
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'roles' => ['required', 'array'],
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        $user->roles()->attach($request->roles);
+            $user->roles()->attach($request->roles);
 
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+            return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Failed to create user.');
+        }
     }
 
     public function show(User $user)
     {
-        $user->load(['roles', 'attendances', 'loginSessions', 'activityLogs']);
-        return view('admin.users.show', compact('user'));
+        try {
+            $user->load(['roles', 'attendances', 'loginSessions', 'activityLogs']);
+            return view('admin.users.show', compact('user'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load user details.');
+        }
     }
 
     public function edit(User $user)
     {
-        $roles = Role::all();
-        $userRoles = $user->roles->pluck('id')->toArray();
-        return view('admin.users.edit', compact('user', 'roles', 'userRoles'));
+        try {
+            $roles = Role::all();
+            $userRoles = $user->roles->pluck('id')->toArray();
+            return view('admin.users.edit', compact('user', 'roles', 'userRoles'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load user edit form.');
+        }
     }
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'roles' => ['required', 'array'],
-        ]);
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
+                'roles' => ['required', 'array'],
+            ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+            ]);
 
-        if ($request->filled('password')) {
-            $request->validate(['password' => ['confirmed', Rules\Password::defaults()]]);
-            $user->update(['password' => Hash::make($request->password)]);
+            if ($request->filled('password')) {
+                $request->validate(['password' => ['confirmed', Rules\Password::defaults()]]);
+                $user->update(['password' => Hash::make($request->password)]);
+            }
+
+            $user->roles()->sync($request->roles);
+
+            return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Failed to update user.');
         }
-
-        $user->roles()->sync($request->roles);
-
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 }

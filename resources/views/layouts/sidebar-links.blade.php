@@ -9,6 +9,16 @@
     </a>
 </li>
 
+<li>
+    <a href="{{ route('attendance.index') }}"
+        class="{{ request()->routeIs('attendance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+        <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        My Attendance
+    </a>
+</li>
+
 <!-- Lead Management (Show for all except basic users if roles dictate) -->
 <li>
     <a href="{{ route('leads.index') }}"

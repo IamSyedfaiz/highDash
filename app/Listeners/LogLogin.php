@@ -15,7 +15,15 @@ class LogLogin
         $user = $event->user;
         $now = now('Asia/Kolkata');
 
-        // 1. Create Login Session
+        // 1. Close any existing open sessions for this user to prevent ghost sessions
+        LoginSession::where('user_id', $user->id)
+            ->whereNull('logout_at')
+            ->update([
+                'logout_at' => $now,
+                'duration_minutes' => 0 // Or calculate based on last activity if possible, but 0 is safe
+            ]);
+
+        // 2. Create New Login Session
         $session = LoginSession::create([
             'user_id' => $user->id,
             'login_at' => $now,
@@ -23,13 +31,15 @@ class LogLogin
             'user_agent' => request()->userAgent(),
         ]);
 
-        // 2. Mark Attendance (only if not already marked for today IST)
-        $attendance = Attendance::firstOrCreate(
+        // 3. Mark/Ensure Attendance record for today
+        // firstOrCreate only sets values if it CREATES. We'll use more robust logic in the middleware,
+        // but it's good to have this as a backup.
+        Attendance::firstOrCreate(
             ['user_id' => $user->id, 'date' => $now->toDateString()],
             ['login_at' => $now, 'status' => 'present']
         );
 
-        // 3. Log Activity
+        // 4. Log Activity
         ActivityLog::create([
             'user_id' => $user->id,
             'action' => 'login',

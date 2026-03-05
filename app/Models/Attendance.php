@@ -25,4 +25,10 @@ class Attendance extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function loginSessions()
+    {
+        return $this->hasMany(LoginSession::class, 'user_id', 'user_id')
+            ->whereDate('login_at', $this->date);
+    }
 }
