@@ -11,25 +11,39 @@
 
 <li>
     <a href="{{ route('attendance.index') }}"
-        class="{{ request()->routeIs('attendance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+        class="{{ request()->routeIs('attendance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-black leading-6 transition-all duration-200 uppercase tracking-tight">
         <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        My Attendance
+        Attendance & Logs
     </a>
 </li>
 
-<!-- Lead Management (Show for all except basic users if roles dictate) -->
-<li>
-    <a href="{{ route('leads.index') }}"
-        class="{{ request()->routeIs('leads.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
-        <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-        </svg>
-        Lead Management
-    </a>
-</li>
+@if(!Auth::user()->hasRole('technical') || Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+    <li>
+        <a href="{{ route('leads.index') }}"
+            class="{{ request()->routeIs('leads.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+            </svg>
+            Lead Management
+        </a>
+    </li>
+@endif
+
+@if(!Auth::user()->hasRole('calling') || Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+    <li>
+        <a href="{{ route('tasks.index') }}"
+            class="{{ request()->routeIs('tasks.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 18 4.5H6a2.25 2.25 0 0 0-2.25 2.25v12.75A2.25 2.25 0 0 0 6 21h12" />
+            </svg>
+            Daily Tasks
+        </a>
+    </li>
+@endif
 
 @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
@@ -66,22 +80,44 @@
                     Roles & Permissions
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.leaves.index') }}"
+                    class="{{ request()->routeIs('admin.leaves.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M12 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    Leave Management
+                </a>
+            </li>
         </ul>
     </li>
 @endif
 
-<li>
-    <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">Reports</div>
-    <ul role="list" class="-mx-2 space-y-1">
-        <li>
-            <a href="{{ route('admin.reports.index') }}"
-                class="{{ request()->routeIs('admin.reports.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
-                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0V3m0 13.5v3.75m0-3.75h7.5m0 0v3.75m-7.5-12h7.5m-7.5 3h7.5m-7.5 3h7.5" />
-                </svg>
-                Attendance Logs
-            </a>
-        </li>
-    </ul>
-</li>
+@if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+    <li>
+        <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">Reports</div>
+        <ul role="list" class="-mx-2 space-y-1">
+            <li>
+                <a href="{{ route('admin.reports.index') }}"
+                    class="{{ request()->routeIs('admin.reports.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0V3m0 13.5v3.75m0-3.75h7.5m0 0v3.75m-7.5-12h7.5m-7.5 3h7.5m-7.5 3h7.5" />
+                    </svg>
+                    Systems Access
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.reports.index') }}"
+                    class="{{ request()->routeIs('admin.reports.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                    </svg>
+                    Performance Analytics
+                </a>
+            </li>
+        </ul>
+    </li>
+@endif

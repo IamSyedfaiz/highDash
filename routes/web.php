@@ -7,13 +7,17 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadImportExportController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\LeadAllocationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Illuminate\Support\Facades\Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -24,23 +28,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Lead Management
-    Route::resource('leads', LeadController::class);
-    Route::post('leads/{lead}/quick-update', [LeadController::class, 'quickUpdate'])->name('leads.quickUpdate');
-    Route::post('leads/{lead}/followups', [LeadController::class, 'storeFollowUp'])->name('leads.followups.store');
-    Route::post('leads/import', [LeadImportExportController::class, 'import'])->name('leads.import');
-    Route::get('leads/export/download', [LeadImportExportController::class, 'export'])->name('leads.export');
+    // Lead Management (Calling Team & Admins)
+    Route::middleware('role:admin,manager,calling')->group(function () {
+        Route::resource('leads', LeadController::class);
+        Route::post('leads/{lead}/quick-update', [LeadController::class, 'quickUpdate'])->name('leads.quickUpdate');
+        Route::post('leads/{lead}/followups', [LeadController::class, 'storeFollowUp'])->name('leads.followups.store');
+        Route::post('leads/import', [LeadImportExportController::class, 'import'])->name('leads.import');
+        Route::get('leads/export/download', [LeadImportExportController::class, 'export'])->name('leads.export');
+    });
 
-    // Attendance & Leaves
+    // Tasks (Technical Team & Admins)
+    Route::middleware('role:admin,manager,technical')->group(function () {
+        Route::resource('tasks', TaskController::class);
+    });
+
+    // Attendance & Leaves (All Users)
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/attendance/export', [AttendanceController::class, 'export'])->name('attendance.export');
-    Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
     Route::resource('leaves', LeaveRequestController::class);
 
     // Admin Specific
     Route::middleware('role:admin,manager')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
+        Route::resource('leaves', LeaveRequestController::class);
+
         Route::patch('leaves/{leave}/status', [LeaveRequestController::class, 'updateStatus'])->name('leaves.updateStatus');
 
         // Lead Allocation
@@ -49,7 +61,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/user/{user}', [ReportController::class, 'userPerformance'])->name('reports.user.performance');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+        Route::get('/reports/export/leads', [ReportController::class, 'exportLeads'])->name('reports.export.leads');
+        Route::get('/reports/export/tasks', [ReportController::class, 'exportTasks'])->name('reports.export.tasks');
     });
 });
 

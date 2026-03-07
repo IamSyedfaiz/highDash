@@ -39,12 +39,12 @@ class UpdateAttendanceMiddleware
             $dayStart = $now->copy()->startOfDay();
             $dayEnd = $now->copy()->endOfDay();
 
-            // Get all sessions that touch today
+            // Safer query: Get all sessions that OVERLAP with today (as per IST)
             $sessions = LoginSession::where('user_id', $user->id)
-                ->where(function ($query) use ($date) {
-                    $query->whereDate('login_at', $date)
-                        ->orWhereDate('logout_at', $date)
-                        ->orWhereNull('logout_at');
+                ->where('login_at', '<', $dayEnd)
+                ->where(function ($query) use ($dayStart) {
+                    $query->whereNull('logout_at')
+                        ->orWhere('logout_at', '>', $dayStart);
                 })->get();
 
             $totalSeconds = 0;
@@ -52,6 +52,7 @@ class UpdateAttendanceMiddleware
                 if (!$session->login_at)
                     continue;
 
+                // Important: Ensure we are comparing in the same timezone (IST)
                 $sessLogin = $session->login_at->copy()->setTimezone('Asia/Kolkata');
                 $sessLogout = ($session->logout_at ?? $now)->copy()->setTimezone('Asia/Kolkata');
 
@@ -67,10 +68,12 @@ class UpdateAttendanceMiddleware
             // Guard against negative or weird values
             $finalMinutes = max(0, (int) floor($totalSeconds / 60));
 
-            $attendance->update([
-                'logout_at' => $now, // Acts as "Last seen"
+            // 3. Update Global Attendance Record
+            $attendance->fill([
+                'logout_at' => $now, // Acts as "Last seen" for the day
                 'work_duration_minutes' => $finalMinutes
             ]);
+            $attendance->save();
         }
 
         return $next($request);

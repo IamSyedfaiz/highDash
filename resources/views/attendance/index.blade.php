@@ -10,16 +10,24 @@
             </div>
             <div class="flex gap-3">
                 <a href="{{ route('attendance.export', ['type' => 'current']) }}"
-                    class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all">
-                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black rounded-xl shadow-lg shadow-emerald-500/20 transition-all uppercase tracking-widest text-[10px]">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Export Current Month
+                    Monthly Total
+                </a>
+                <a href="{{ route('attendance.export', ['type' => 'current', 'mode' => 'detailed']) }}"
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-black rounded-xl shadow-lg shadow-indigo-500/20 transition-all uppercase tracking-widest text-[10px]">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Detailed Entry Log
                 </a>
                 <a href="{{ route('attendance.export', ['type' => 'last']) }}"
-                    class="inline-flex items-center px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-sm font-bold rounded-xl shadow-lg transition-all">
-                    Export Last Month
+                    class="inline-flex items-center px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-black rounded-xl shadow-lg transition-all uppercase tracking-widest">
+                    Last Month
                 </a>
             </div>
         </div>
@@ -35,7 +43,9 @@
                 class="px-6 py-2 rounded-xl text-sm font-bold transition-all">Sessions History</button>
             <button @click="tab = 'leaves'"
                 :class="tab === 'leaves' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-                class="px-6 py-2 rounded-xl text-sm font-bold transition-all">Leaves</button>
+                class="px-6 py-2 rounded-xl text-sm font-bold transition-all">
+                {{ (Auth::user()->isAdmin() || Auth::user()->hasRole('manager')) ? 'Leaves Management' : 'My Leaves' }}
+            </button>
         </div>
 
         <!-- Tab Contents -->
@@ -276,6 +286,7 @@
                     </div>
                 @endforelse
             </div>
+        </div>
         </div>
     </div>
 @endsection

@@ -64,6 +64,12 @@ class DashboardController extends Controller
                 'assignedLeadsCount' => $user->leads()->count(),
                 'newLeadsCount' => $user->leads()->where('status', 'New Lead')->count(),
                 'convertedLeadsCount' => $user->leads()->where('status', 'Existing')->count(),
+                'taskStats' => [
+                    'pending' => $user->tasks()->where('status', 'pending')->count(),
+                    'started' => $user->tasks()->where('status', 'started')->count(),
+                    'closed' => $user->tasks()->where('status', 'closed')->count(),
+                    'total' => $user->tasks()->count()
+                ],
                 'stats' => [
                     'present' => Attendance::where('user_id', $user->id)->where('status', 'present')->count(),
                     'absent' => Attendance::where('user_id', $user->id)->where('status', 'absent')->count(),

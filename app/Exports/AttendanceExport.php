@@ -42,15 +42,43 @@ class AttendanceExport implements FromQuery, WithHeadings, WithMapping
 
     public function map($attendance): array
     {
-        $hours = floor($attendance->work_duration_minutes / 60);
-        $minutes = $attendance->work_duration_minutes % 60;
+        $loginAt = $attendance->login_at ? \Carbon\Carbon::parse($attendance->login_at)->setTimezone('Asia/Kolkata') : null;
+        $logoutAt = $attendance->logout_at ? \Carbon\Carbon::parse($attendance->logout_at)->setTimezone('Asia/Kolkata') : null;
+
+        $totalMinutes = $attendance->work_duration_minutes ?? 0;
+
+        // If DB minutes is 0, recalculate from sessions (just to be safe)
+        if ($totalMinutes == 0) {
+            $totalSeconds = 0;
+            $dayStart = $attendance->date->copy()->startOfDay();
+            $dayEnd = $attendance->date->copy()->endOfDay();
+
+            $sessions = $attendance->loginSessions;
+            foreach ($sessions as $session) {
+                if (!$session->login_at)
+                    continue;
+                $sStart = $session->login_at->copy()->setTimezone('Asia/Kolkata');
+                $sEnd = ($session->logout_at ?? now())->copy()->setTimezone('Asia/Kolkata');
+
+                $start = $sStart->gt($dayStart) ? $sStart : $dayStart;
+                $end = $sEnd->lt($dayEnd) ? $sEnd : $dayEnd;
+
+                if ($end->gt($start)) {
+                    $totalSeconds += (int) $end->diffInSeconds($start);
+                }
+            }
+            $totalMinutes = floor($totalSeconds / 60);
+        }
+
+        $h = floor($totalMinutes / 60);
+        $m = $totalMinutes % 60;
 
         return [
-            $attendance->date,
-            $attendance->login_at ? $attendance->login_at->format('H:i:s') : '-',
-            $attendance->logout_at ? $attendance->logout_at->format('H:i:s') : '-',
-            $attendance->work_duration_minutes,
-            $hours . 'h ' . $minutes . 'm',
+            $attendance->date->format('Y-m-d'),
+            $loginAt ? $loginAt->format('h:i:s A') : '-',
+            $logoutAt ? $logoutAt->format('h:i:s A') : '-',
+            $totalMinutes,
+            sprintf('%02dh %02dm', $h, $m),
             ucfirst($attendance->status),
         ];
     }

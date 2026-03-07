@@ -97,4 +97,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(LoginSession::class)->whereNull('logout_at')->latest('login_at');
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

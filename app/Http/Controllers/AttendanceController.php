@@ -45,6 +45,10 @@ class AttendanceController extends Controller
             $month = $targetMonth->month;
             $year = $targetMonth->year;
 
+            if ($request->mode === 'detailed') {
+                return Excel::download(new \App\Exports\SessionExport($user->id, $month, $year), 'detailed_logs_' . $targetMonth->format('M_Y') . '.xlsx');
+            }
+
             return Excel::download(new AttendanceExport($user->id, $month, $year), 'attendance_' . $targetMonth->format('M_Y') . '.xlsx');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to export attendance data.');

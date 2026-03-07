@@ -80,10 +80,12 @@
                                         {{ substr($record->user->name, 0, 1) }}
                                     </div>
                                     <div>
-                                        <div class="text-sm font-black text-slate-900 dark:text-white">{{ $record->user->name }}</div>
+                                    <a href="{{ route('admin.reports.user.performance', $record->user) }}" class="group/user">
+                                        <div class="text-sm font-black text-slate-900 dark:text-white group-hover/user:text-indigo-600 transition-colors">{{ $record->user->name }}</div>
                                         <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
                                             {{ \Carbon\Carbon::parse($record->date)->format('D, M d Y') }}
                                         </div>
+                                    </a>
                                     </div>
                                 </div>
                             </td>

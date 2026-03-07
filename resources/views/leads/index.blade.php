@@ -25,13 +25,15 @@
                     Export Excel
                 </a>
             @endif
-            <a href="{{ route('leads.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200">
-                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Add Lead Manually
-            </a>
+            @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+                <a href="{{ route('leads.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Lead Manually
+                </a>
+            @endif
         </div>
     </div>
 
@@ -83,7 +85,8 @@
                         <option value="">All Agents</option>
                         @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ request('assigned_to') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }}</option>
+                                {{ $user->name }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -141,9 +144,11 @@
                                             </div>
                                             <div class="ml-4 truncate max-w-[150px]">
                                                 <div class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                                                    {{ $lead->company_name }}</div>
+                                                    {{ $lead->company_name }}
+                                                </div>
                                                 <div class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                                    {{ $lead->contact_name ?? 'No Contact' }}</div>
+                                                    {{ $lead->contact_name ?? 'No Contact' }}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -159,12 +164,12 @@
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
-                                            {{ $lead->status === 'New Lead' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                            {{ $lead->status === 'New Lead' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' :
                         ($lead->status === 'Existing' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400' :
                             'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400') }}">
                                             <span
                                                 class="h-1.5 w-1.5 rounded-full mr-2 
-                                                {{ $lead->status === 'New Lead' ? 'bg-emerald-400' : ($lead->status === 'Existing' ? 'bg-indigo-400' : 'bg-rose-400') }}"></span>
+                                                                {{ $lead->status === 'New Lead' ? 'bg-emerald-400' : ($lead->status === 'Existing' ? 'bg-indigo-400' : 'bg-rose-400') }}"></span>
                                             {{ $lead->status }}
                                         </span>
                                     </td>

@@ -44,6 +44,9 @@ class LeadController extends Controller
     public function create()
     {
         try {
+            if (!Auth::user()->isAdmin() && !Auth::user()->hasRole('manager')) {
+                return redirect()->route('leads.index')->with('error', 'Unauthorized to create leads manually.');
+            }
             return view('leads.create');
         } catch (\Exception $e) {
             return back()->with('error', 'Unable to open lead creation form.');
@@ -53,6 +56,9 @@ class LeadController extends Controller
     public function store(Request $request)
     {
         try {
+            if (!Auth::user()->isAdmin() && !Auth::user()->hasRole('manager')) {
+                return redirect()->route('leads.index')->with('error', 'Unauthorized to create leads manually.');
+            }
             $validated = $request->validate([
                 'company_name' => 'required|string|max:255',
                 'contact_name' => 'nullable|string|max:255',
@@ -152,6 +158,15 @@ class LeadController extends Controller
             }
 
             $lead->update($validated);
+
+            \App\Models\ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'lead_quick_update',
+                'description' => 'Updated status for lead: ' . $lead->company_name,
+                'model_type' => Lead::class,
+                'model_id' => $lead->id,
+            ]);
+
             return back()->with('success', 'Status updated.');
         } catch (\Exception $e) {
             return back()->with('error', 'Quick update failed.');
@@ -177,6 +192,14 @@ class LeadController extends Controller
             $lead->update([
                 'calling_status' => $validated['status'],
                 'feedback' => $validated['message']
+            ]);
+
+            \App\Models\ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'lead_followup',
+                'description' => 'Recorded follow-up for lead: ' . $lead->company_name,
+                'model_type' => Lead::class,
+                'model_id' => $lead->id,
             ]);
 
             return back()->with('success', 'Follow-up recorded successfully.');
