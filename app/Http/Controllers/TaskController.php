@@ -29,7 +29,11 @@ class TaskController extends Controller
                 $query->where('status', $request->status);
             }
 
-            $tasks = $query->latest()->paginate(15)->withQueryString();
+            if ($request->date) {
+                $query->whereDate('task_date', $request->date);
+            }
+
+            $tasks = $query->orderBy('task_date', 'desc')->latest()->paginate(30)->withQueryString();
             $users = User::all();
 
             return view('tasks.index', compact('tasks', 'users'));
@@ -46,12 +50,14 @@ class TaskController extends Controller
                 'description' => 'nullable|string',
                 'url' => 'nullable|url',
                 'user_id' => 'nullable|exists:users,id',
+                'task_date' => 'nullable|date',
             ]);
 
             $task = Task::create([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'url' => $validated['url'],
+                'task_date' => $validated['task_date'] ?? now()->format('Y-m-d'),
                 'user_id' => $validated['user_id'] ?? Auth::id(),
                 'created_by' => Auth::id(),
                 'status' => 'pending',

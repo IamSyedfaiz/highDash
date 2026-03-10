@@ -16,11 +16,13 @@ class Task extends Model
         'description',
         'url',
         'status',
+        'task_date',
         'started_at',
         'completed_at'
     ];
 
     protected $casts = [
+        'task_date' => 'date',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];

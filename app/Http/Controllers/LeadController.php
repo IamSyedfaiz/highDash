@@ -21,16 +21,26 @@ class LeadController extends Controller
 
             if ($request->company)
                 $query->where('company_name', 'like', '%' . $request->company . '%');
-            if ($request->status)
-                $query->where('status', $request->status);
+            if ($request->status) {
+                if ($request->status === 'Unassigned') {
+                    $query->whereNull('assigned_to');
+                } else {
+                    $query->where('status', $request->status);
+                }
+            }
             if ($request->city)
                 $query->where('city', 'like', '%' . $request->city . '%');
             if ($request->business_type)
                 $query->where('business_type', $request->business_type);
             if ($request->source)
                 $query->where('lead_source', $request->source);
-            if ($request->assigned_to)
-                $query->where('assigned_to', $request->assigned_to);
+            if ($request->assigned_to) {
+                if ($request->assigned_to === 'none') {
+                    $query->whereNull('assigned_to');
+                } else {
+                    $query->where('assigned_to', $request->assigned_to);
+                }
+            }
 
             $leads = $query->latest()->paginate(15)->withQueryString();
             $users = User::all();
@@ -69,7 +79,7 @@ class LeadController extends Controller
                 'city' => 'nullable|string',
                 'state' => 'nullable|string',
                 'address' => 'nullable|string',
-                'business_type' => 'required|string',
+                'business_type' => 'required|in:Manufacturer,Supplier,Trader,Wholesaler,Importer,Exporter,Service Provider',
                 'lead_source' => 'nullable|string',
             ]);
 
@@ -114,15 +124,18 @@ class LeadController extends Controller
                 'city' => 'nullable|string',
                 'state' => 'nullable|string',
                 'address' => 'nullable|string',
-                'business_type' => 'required|string',
+                'business_type' => 'required|in:Manufacturer,Supplier,Trader,Wholesaler,Importer,Exporter,Service Provider',
                 'lead_source' => 'nullable|string',
-                'status' => 'required|string',
-                'calling_status' => 'nullable|string',
+                'status' => 'required|in:Pending,New Lead,Existing,Drop,Prospect,Approach,Negotiable,Order won',
+                'prospect_status' => 'nullable|in:Approach,Negotiable,Order Won,Order Lost,None',
+                'calling_status' => 'nullable|in:Call Answered,Busy / Callback,Not Answered,Interested,Not Interested,Switched Off,Wrong Number',
                 'feedback' => 'nullable|string',
             ]);
 
             if ($validated['status'] === 'Drop') {
+                $validated['status'] = 'Pending';
                 $validated['assigned_to'] = null;
+                $lead->assigned_to = null;
             }
 
             $lead->update($validated);
@@ -137,6 +150,9 @@ class LeadController extends Controller
     public function destroy(Lead $lead)
     {
         try {
+            if (!Auth::user()->isAdmin() && !Auth::user()->hasRole('manager')) {
+                return back()->with('error', 'Unauthorized: Only administrators can delete leads.');
+            }
             $lead->delete();
             return redirect()->route('leads.index')->with('success', 'Lead deleted successfully.');
         } catch (\Exception $e) {
@@ -148,12 +164,14 @@ class LeadController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => 'required|string',
-                'calling_status' => 'required|string',
+                'status' => 'required|in:Pending,New Lead,Existing,Drop,Prospect,Approach,Negotiable,Order won',
+                'prospect_status' => 'nullable|in:Approach,Negotiable,Order Won,Order Lost,None',
+                'calling_status' => 'required|in:Call Answered,Busy / Callback,Not Answered,Interested,Not Interested,Switched Off,Wrong Number',
                 'feedback' => 'nullable|string',
             ]);
 
             if ($validated['status'] === 'Drop') {
+                $validated['status'] = 'Pending';
                 $lead->assigned_to = null;
             }
 
@@ -176,7 +194,8 @@ class LeadController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => 'required|string',
+                'status' => 'required|in:Call Answered,Busy / Callback,Not Answered,Interested,Not Interested,Switched Off,Wrong Number',
+                'prospect_status' => 'nullable|in:Approach,Negotiable,Order Won,Order Lost,None',
                 'message' => 'required|string',
                 'next_follow_up_date' => 'nullable|date|after_or_equal:today',
             ]);
@@ -189,10 +208,21 @@ class LeadController extends Controller
             ]);
 
             // Update lead status to match follow up result
-            $lead->update([
+            $updateData = [
                 'calling_status' => $validated['status'],
                 'feedback' => $validated['message']
-            ]);
+            ];
+
+            if (isset($validated['prospect_status'])) {
+                $updateData['prospect_status'] = $validated['prospect_status'];
+            }
+
+            if ($request->has('update_lead_status') && $request->update_lead_status === 'drop') {
+                $updateData['status'] = 'Pending';
+                $updateData['assigned_to'] = null;
+            }
+
+            $lead->update($updateData);
 
             \App\Models\ActivityLog::create([
                 'user_id' => Auth::id(),

@@ -39,7 +39,7 @@ class LeaveRequestController extends Controller
     {
         try {
             $request->validate([
-                'type' => 'required|string',
+                'type' => 'required|in:casual,sick,annual,unpaid,maternity/paternity,other',
                 'from_date' => 'required|date',
                 'to_date' => 'required|date|after_or_equal:from_date',
                 'reason' => 'required|string|max:500',

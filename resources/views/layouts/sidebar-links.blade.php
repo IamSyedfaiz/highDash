@@ -45,6 +45,18 @@
     </li>
 @endif
 
+@if((Auth::user()->hasRole('calling') || Auth::user()->hasRole('technical')) && !Auth::user()->isAdmin() && !Auth::user()->hasRole('manager'))
+    <li>
+        <a href="{{ route('performance.index') }}"
+            class="{{ request()->routeIs('performance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+            </svg>
+            My Performance
+        </a>
+    </li>
+@endif
+
 @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
         <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">Administration
@@ -100,17 +112,17 @@
         <ul role="list" class="-mx-2 space-y-1">
             <li>
                 <a href="{{ route('admin.reports.index') }}"
-                    class="{{ request()->routeIs('admin.reports.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                    class="{{ request()->routeIs('admin.reports.index') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0V3m0 13.5v3.75m0-3.75h7.5m0 0v3.75m-7.5-12h7.5m-7.5 3h7.5m-7.5 3h7.5" />
+                            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 18 4.5H6a2.25 2.25 0 0 0-2.25 2.25v12.75A2.25 2.25 0 0 0 6 21h12" />
                     </svg>
-                    Systems Access
+                    Attendance Audit
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.reports.index') }}"
-                    class="{{ request()->routeIs('admin.reports.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                <a href="{{ route('performance.index') }}"
+                    class="{{ request()->routeIs('performance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />

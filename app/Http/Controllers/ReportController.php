@@ -84,13 +84,14 @@ class ReportController extends Controller
                 fputcsv($handle, ['User', 'Date', 'Clock In', 'Clock Out', 'Duration (Min)', 'Status']);
                 foreach ($attendances as $row) {
                     $minutes = $this->calculateMinutes($row);
+                    $status = ($minutes >= 420) ? 'Full Day' : 'Half Day';
                     fputcsv($handle, [
                         $row->user->name,
                         $row->date instanceof Carbon ? $row->date->format('Y-m-d') : $row->date,
                         $row->login_at?->setTimezone('Asia/Kolkata')->format('h:i:s A') ?? '-',
                         $row->logout_at?->setTimezone('Asia/Kolkata')->format('h:i:s A') ?? '-',
                         $minutes,
-                        ucfirst($row->status)
+                        $status
                     ]);
                 }
                 fclose($handle);

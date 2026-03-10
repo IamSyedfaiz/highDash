@@ -28,8 +28,8 @@ class AttendanceController extends Controller
 
             // Statistics
             $totalMinutes = $attendances->sum('work_duration_minutes');
-            $fullDays = $attendances->where('work_duration_minutes', '>=', 480)->count(); // 8 hours
-            $halfDays = $attendances->where('work_duration_minutes', '>=', 240)->where('work_duration_minutes', '<', 480)->count(); // 4-8 hours
+            $fullDays = $attendances->where('work_duration_minutes', '>=', 420)->count();
+            $halfDays = $attendances->where('work_duration_minutes', '<', 420)->count();
 
             return view('attendance.index', compact('today', 'attendances', 'leaves', 'month', 'year', 'totalMinutes', 'fullDays', 'halfDays'));
         } catch (\Exception $e) {

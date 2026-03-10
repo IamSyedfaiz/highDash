@@ -22,6 +22,7 @@ class Lead extends Model
         'lead_source',
         'business_type',
         'status',
+        'prospect_status',
         'calling_status',
         'feedback',
         'assigned_to'

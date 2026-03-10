@@ -72,6 +72,7 @@ class AttendanceExport implements FromQuery, WithHeadings, WithMapping
 
         $h = floor($totalMinutes / 60);
         $m = $totalMinutes % 60;
+        $status = ($totalMinutes >= 420) ? 'Full Day' : 'Half Day';
 
         return [
             $attendance->date->format('Y-m-d'),
@@ -79,7 +80,7 @@ class AttendanceExport implements FromQuery, WithHeadings, WithMapping
             $logoutAt ? $logoutAt->format('h:i:s A') : '-',
             $totalMinutes,
             sprintf('%02dh %02dm', $h, $m),
-            ucfirst($attendance->status),
+            $status,
         ];
     }
 }

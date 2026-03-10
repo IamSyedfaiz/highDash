@@ -69,9 +69,13 @@ class UpdateAttendanceMiddleware
             $finalMinutes = max(0, (int) floor($totalSeconds / 60));
 
             // 3. Update Global Attendance Record
+            // Logic: 7 hours (420 mins) = Full Day (present), otherwise Half Day (half-day)
+            $status = ($finalMinutes >= 420) ? 'present' : 'half-day';
+
             $attendance->fill([
                 'logout_at' => $now, // Acts as "Last seen" for the day
-                'work_duration_minutes' => $finalMinutes
+                'work_duration_minutes' => $finalMinutes,
+                'status' => $status
             ]);
             $attendance->save();
         }

@@ -12,24 +12,49 @@
             <div
                 class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-all">
                 <div
-                    class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <h3 class="font-bold text-slate-900 dark:text-white flex items-center">
-                        <span
-                            class="p-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg mr-3">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </span>
-                        Unassigned Leads
-                    </h3>
-                    <div class="flex items-center gap-4 w-full md:w-auto">
-                        <div id="selectionCounter" class="text-xs font-bold text-slate-500 dark:text-slate-400 hidden">
-                            <span id="selectedCount">0</span> selected
+                    class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <h3 class="font-bold text-slate-900 dark:text-white flex items-center">
+                            <span
+                                class="p-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg mr-3">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </span>
+                            Unassigned Leads
+                        </h3>
+                        <div class="flex items-center gap-4 w-full md:w-auto">
+                            <div id="selectionCounter" class="text-xs font-bold text-slate-500 dark:text-slate-400 hidden">
+                                <span id="selectedCount">0</span> selected
+                            </div>
+                            <button type="button" onclick="toggleSelectAll()" id="selectAllBtn"
+                                class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">Select All</button>
                         </div>
-                        <button type="button" onclick="toggleSelectAll()" id="selectAllBtn"
-                            class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">Select All</button>
                     </div>
+
+                    <!-- Search and Filters -->
+                    <form action="{{ route('admin.leads.allocation') }}" method="GET" class="flex flex-col md:flex-row gap-4">
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search company or city..." 
+                                class="w-full pl-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="w-full md:w-48">
+                            <select name="status" onchange="this.form.submit()" 
+                                class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                                <option value="">All Statuses</option>
+                                @foreach(['Pending', 'Prospect', 'Approach', 'Negotiable', 'Order won'] as $status)
+                                    <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ $status }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="hidden">Search</button>
+                    </form>
                 </div>
 
                 <form action="{{ route('admin.leads.allocate') }}" method="POST" id="allocationForm">
@@ -85,6 +110,10 @@
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800">
+                        {{ $unassignedLeads->links() }}
                     </div>
 
                     @if($unassignedLeads->count() > 0)

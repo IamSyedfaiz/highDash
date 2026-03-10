@@ -122,17 +122,13 @@
                                 </div>
                             </td>
                             <td class="px-8 py-6 whitespace-nowrap">
-                                @if($record->work_duration_minutes >= 480)
+                                @if($record->work_duration_minutes >= 420)
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-800 shadow-sm shadow-emerald-500/5">
                                         Full Day
                                     </span>
-                                @elseif($record->work_duration_minutes >= 240)
+                                @else
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-100 text-amber-800 shadow-sm shadow-amber-500/5">
                                         Half Day
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-800 shadow-sm">
-                                        Short Leave
                                     </span>
                                 @endif
                             </td>

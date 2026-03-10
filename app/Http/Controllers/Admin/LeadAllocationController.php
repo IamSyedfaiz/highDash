@@ -10,15 +10,34 @@ use App\Models\User;
 
 class LeadAllocationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $unassignedLeads = Lead::whereNull('assigned_to')->whereNot('status', 'Drop')->get();
+            $query = Lead::whereNull('assigned_to')->whereNot('status', 'Drop');
+
+            // Add search filters
+            if ($request->search) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('company_name', 'like', '%' . $request->search . '%')
+                        ->orWhere('city', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            if ($request->status) {
+                $query->where('status', $request->status);
+            }
+
+            $unassignedLeads = $query->latest()->paginate(20)->withQueryString();
+
             $callingUsers = User::whereHas('roles', function ($q) {
                 $q->where('slug', 'calling');
-            })->get();
+            })->withCount('leads')->get();
 
-            $recentlyAssigned = Lead::whereNotNull('assigned_to')->with('assignedUser')->latest('updated_at')->take(10)->get();
+            $recentlyAssigned = Lead::whereNotNull('assigned_to')
+                ->with('assignedUser')
+                ->latest('updated_at')
+                ->take(10)
+                ->get();
 
             return view('admin.leads.allocation', compact('unassignedLeads', 'callingUsers', 'recentlyAssigned'));
         } catch (\Exception $e) {

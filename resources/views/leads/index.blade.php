@@ -54,9 +54,15 @@
                 <select name="status"
                     class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                     <option value="">All Statuses</option>
+                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="Unassigned" {{ request('status') == 'Unassigned' ? 'selected' : '' }}>Unassigned</option>
+                    <option value="Prospect" {{ request('status') == 'Prospect' ? 'selected' : '' }}>Prospect</option>
+                    <option value="Approach" {{ request('status') == 'Approach' ? 'selected' : '' }}>Approach</option>
+                    <option value="Negotiable" {{ request('status') == 'Negotiable' ? 'selected' : '' }}>Negotiable</option>
+                    <option value="Order won" {{ request('status') == 'Order won' ? 'selected' : '' }}>Order won</option>
                     <option value="New Lead" {{ request('status') == 'New Lead' ? 'selected' : '' }}>New Lead</option>
                     <option value="Existing" {{ request('status') == 'Existing' ? 'selected' : '' }}>Existing</option>
-                    <option value="Drop" {{ request('status') == 'Drop' ? 'selected' : '' }}>Drop</option>
+                    <option value="Order Lost" {{ request('status') == 'Order Lost' ? 'selected' : '' }}>Order Lost</option>
                 </select>
             </div>
             <div class="space-y-1">
@@ -83,6 +89,7 @@
                     <select name="assigned_to"
                         class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                         <option value="">All Agents</option>
+                        <option value="none" {{ request('assigned_to') == 'none' ? 'selected' : '' }}>Not Assigned</option>
                         @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ request('assigned_to') == $user->id ? 'selected' : '' }}>
                                 {{ $user->name }}
@@ -127,6 +134,9 @@
                             Status</th>
                         <th
                             class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Pipeline</th>
+                        <th
+                            class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Assigned To</th>
                         <th
                             class="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -135,80 +145,104 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     @forelse($leads as $lead)
-                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="h-10 w-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
-                                                {{ substr($lead->company_name, 0, 1) }}
-                                            </div>
-                                            <div class="ml-4 truncate max-w-[150px]">
-                                                <div class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                                                    {{ $lead->company_name }}
-                                                </div>
-                                                <div class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                                    {{ $lead->contact_name ?? 'No Contact' }}
-                                                </div>
-                                            </div>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div
+                                        class="h-10 w-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
+                                        {{ substr($lead->company_name, 0, 1) }}
+                                    </div>
+                                    <div class="ml-4 truncate max-w-[150px]">
+                                        <div class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                            {{ $lead->company_name }}
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="text-sm text-slate-900 dark:text-slate-200 font-medium">{{ $lead->phone }}</div>
-                                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ $lead->email ?? 'N/A' }}</div>
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-semibold">
-                                            {{ $lead->business_type }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
-                                                            {{ $lead->status === 'New Lead' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                        ($lead->status === 'Existing' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400' :
-                            'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400') }}">
-                                            <span
-                                                class="h-1.5 w-1.5 rounded-full mr-2 
-                                                                {{ $lead->status === 'New Lead' ? 'bg-emerald-400' : ($lead->status === 'Existing' ? 'bg-indigo-400' : 'bg-rose-400') }}"></span>
-                                            {{ $lead->status }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        @if($lead->assignedUser)
-                                            <div class="flex items-center">
-                                                <img class="h-6 w-6 rounded-full"
-                                                    src="https://ui-avatars.com/api/?name={{ urlencode($lead->assignedUser->name) }}&color=7F9CF5&background=EBF4FF"
-                                                    alt="">
+                                        <div class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                            {{ $lead->contact_name ?? 'No Contact' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="text-sm text-slate-900 dark:text-slate-200 font-medium">{{ $lead->phone }}</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">{{ $lead->email ?? 'N/A' }}</div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <span
+                                    class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-semibold">
+                                    {{ $lead->business_type }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
+                                                                                            @if($lead->status === 'Pending') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
+                                                                                            @elseif($lead->status === 'Prospect') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                                                                            @elseif($lead->status === 'Approach') bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400
+                                                                                            @elseif($lead->status === 'Negotiable') bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400
+                                                                                            @elseif($lead->status === 'Order won' || $lead->status === 'New Lead') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400
+                                                                                            @elseif($lead->status === 'Existing') bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400
+                                                                                            @else bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 @endif">
+                                    <span
+                                        class="h-1.5 w-1.5 rounded-full mr-2 
+                                                                                                @if($lead->status === 'Pending') bg-amber-400
+                                                                                                @elseif($lead->status === 'Prospect') bg-blue-400
+                                                                                                @elseif($lead->status === 'Approach') bg-indigo-400
+                                                                                                @elseif($lead->status === 'Negotiable') bg-violet-400
+                                                                                                @elseif($lead->status === 'Order won' || $lead->status === 'New Lead') bg-emerald-400
+                                                                                                @elseif($lead->status === 'Existing') bg-slate-400
+                                                                                                @else bg-rose-400 @endif"></span>
+                                    {{ $lead->status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                @if($lead->prospect_status && $lead->prospect_status !== 'None')
                                                 <span
-                                                    class="ml-2 text-sm text-slate-700 dark:text-slate-300">{{ $lead->assignedUser->name }}</span>
-                                            </div>
-                                        @else
-                                            <span class="text-xs text-slate-400 italic">Unassigned</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex justify-end gap-2">
-                                            <a href="{{ route('leads.show', $lead->id) }}"
-                                                class="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
-                                                title="View Details">
-                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                            </a>
-                                            <a href="{{ route('leads.edit', $lead->id) }}"
-                                                class="p-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all"
-                                                title="Edit Lead">
-                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
+                                                    class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter
+                                                                                        {{ $lead->prospect_status === 'Order Won' ? 'bg-emerald-100 text-emerald-800' :
+                                    ($lead->prospect_status === 'Order Lost' ? 'bg-rose-100 text-rose-800' :
+                                        ($lead->prospect_status === 'Negotiable' ? 'bg-violet-100 text-violet-800' : 'bg-indigo-100 text-indigo-800')) }}">
+                                                    {{ $lead->prospect_status }}
+                                                </span>
+                                @else
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Initial</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                @if($lead->assignedUser)
+                                    <div class="flex items-center">
+                                        <img class="h-6 w-6 rounded-full"
+                                            src="https://ui-avatars.com/api/?name={{ urlencode($lead->assignedUser->name) }}&color=7F9CF5&background=EBF4FF"
+                                            alt="">
+                                        <span
+                                            class="ml-2 text-sm text-slate-700 dark:text-slate-300">{{ $lead->assignedUser->name }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-slate-400 italic">Unassigned</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end gap-2">
+                                    <a href="{{ route('leads.show', $lead->id) }}"
+                                        class="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
+                                        title="View Details">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </a>
+                                    <a href="{{ route('leads.edit', $lead->id) }}"
+                                        class="p-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all"
+                                        title="Edit Lead">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-20 text-center">

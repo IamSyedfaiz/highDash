@@ -47,8 +47,9 @@
                         <label class="text-xs font-bold text-slate-500 uppercase ml-1">Business Type *</label>
                         <select name="business_type" required
                             class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
-                            @foreach(['Manufacturer', 'Supplier', 'Trader', 'Wholesaler', 'Importer', 'Exporter', 'Service Provider'] as $type)
-                                <option value="{{ $type }}" {{ $lead->business_type == $type ? 'selected' : '' }}>{{ $type }}
+                            @foreach (['Manufacturer', 'Supplier', 'Trader', 'Wholesaler', 'Importer', 'Exporter', 'Service Provider'] as $type)
+                                <option value="{{ $type }}" {{ $lead->business_type == $type ? 'selected' : '' }}>
+                                    {{ $type }}
                                 </option>
                             @endforeach
                         </select>
@@ -72,9 +73,25 @@
                         <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Overall Status</label>
                         <select name="status"
                             class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                            <option value="Pending" {{ $lead->status == 'Pending' ? 'selected' : '' }}>Pending</option>
                             <option value="New Lead" {{ $lead->status == 'New Lead' ? 'selected' : '' }}>New Lead</option>
                             <option value="Existing" {{ $lead->status == 'Existing' ? 'selected' : '' }}>Existing</option>
                             <option value="Drop" {{ $lead->status == 'Drop' ? 'selected' : '' }}>Drop (Unassign)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Prospect</label>
+                        <select name="prospect_status"
+                            class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                            <option value="None" {{ $lead->prospect_status == 'None' ? 'selected' : '' }}>None</option>
+                            <option value="Approach" {{ $lead->prospect_status == 'Approach' ? 'selected' : '' }}>Approach
+                            </option>
+                            <option value="Negotiable" {{ $lead->prospect_status == 'Negotiable' ? 'selected' : '' }}>
+                                Negotiable</option>
+                            <option value="Order Won" {{ $lead->prospect_status == 'Order Won' ? 'selected' : '' }}>Order
+                                Won</option>
+                            <option value="Order Lost" {{ $lead->prospect_status == 'Order Lost' ? 'selected' : '' }}>Order
+                                Lost</option>
                         </select>
                     </div>
                     <div class="space-y-1">
@@ -84,11 +101,21 @@
                             <option value="">None</option>
                             <option value="Call Answered" {{ $lead->calling_status == 'Call Answered' ? 'selected' : '' }}>
                                 Call Answered</option>
-                            <option value="Not Answered" {{ $lead->calling_status == 'Not Answered' ? 'selected' : '' }}>Not
+                            <option value="Busy / Callback"
+                                {{ $lead->calling_status == 'Busy / Callback' ? 'selected' : '' }}>Busy / Callback</option>
+                            <option value="Not Answered" {{ $lead->calling_status == 'Not Answered' ? 'selected' : '' }}>
+                                Not
                                 Answered</option>
-                            <option value="Busy" {{ $lead->calling_status == 'Busy' ? 'selected' : '' }}>Busy</option>
+                            <option value="Interested" {{ $lead->calling_status == 'Interested' ? 'selected' : '' }}>
+                                Interested</option>
+                            <option value="Not Interested"
+                                {{ $lead->calling_status == 'Not Interested' ? 'selected' : '' }}>
+                                Not Interested</option>
                             <option value="Switched Off" {{ $lead->calling_status == 'Switched Off' ? 'selected' : '' }}>
                                 Switched Off</option>
+                            <option value="Wrong Number" {{ $lead->calling_status == 'Wrong Number' ? 'selected' : '' }}>
+                                Wrong
+                                Number</option>
                         </select>
                     </div>
                 </div>
@@ -122,9 +149,13 @@
 
             <div
                 class="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
-                <button type="button" onclick="confirmDelete()"
-                    class="text-rose-600 font-bold text-sm hover:text-rose-700 transition px-4 py-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl">Delete
-                    Lead Permanently</button>
+                <div>
+                    @if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+                        <button type="button" onclick="confirmDelete()"
+                            class="text-rose-600 font-bold text-sm hover:text-rose-700 transition px-4 py-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl">Delete
+                            Lead Permanently</button>
+                    @endif
+                </div>
                 <div class="flex gap-4">
                     <a href="{{ route('leads.index') }}"
                         class="px-8 py-3 text-slate-600 dark:text-slate-400 font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">Discard</a>

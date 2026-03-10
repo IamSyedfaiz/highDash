@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadImportExportController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\LeadAllocationController;
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Attendance & Leaves (All Users)
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/attendance/export', [AttendanceController::class, 'export'])->name('attendance.export');
+    Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('leaves', LeaveRequestController::class);
 
     // Admin Specific

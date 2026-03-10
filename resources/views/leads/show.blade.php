@@ -12,7 +12,8 @@
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ $lead->company_name }}</h1>
                 <p class="text-slate-500 dark:text-slate-400">Lead ID: #{{ $lead->id }} • Updated
-                    {{ $lead->updated_at->diffForHumans() }}</p>
+                    {{ $lead->updated_at->diffForHumans() }}
+                </p>
             </div>
         </div>
         <div class="flex gap-3">
@@ -44,7 +45,8 @@
                                 <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter">Contact
                                     Executive</p>
                                 <p class="text-sm font-black text-slate-900 dark:text-white">
-                                    {{ $lead->contact_name ?? 'Not Provided' }}</p>
+                                    {{ $lead->contact_name ?? 'Not Provided' }}
+                                </p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -99,7 +101,8 @@
                             <p class="text-[10px] text-indigo-400 font-black uppercase tracking-tighter mb-1">Assigned To
                             </p>
                             <p class="text-xs font-black text-indigo-600 dark:text-indigo-300">
-                                {{ $lead->assignedUser->name ?? 'Unassigned' }}</p>
+                                {{ $lead->assignedUser->name ?? 'Unassigned' }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -147,7 +150,7 @@
                 <div class="p-8">
                     <form action="{{ route('leads.followups.store', $lead->id) }}" method="POST" class="space-y-6">
                         @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Call
                                     Result / Status</label>
@@ -164,8 +167,25 @@
                                 </select>
                             </div>
                             <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Prospect
+                                    Pipeline</label>
+                                <select name="prospect_status"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer">
+                                    <option value="None" {{ $lead->prospect_status == 'None' ? 'selected' : '' }}>None
+                                    </option>
+                                    <option value="Approach" {{ $lead->prospect_status == 'Approach' ? 'selected' : '' }}>
+                                        Approach</option>
+                                    <option value="Negotiable" {{ $lead->prospect_status == 'Negotiable' ? 'selected' : '' }}>
+                                        Negotiable</option>
+                                    <option value="Order Won" {{ $lead->prospect_status == 'Order Won' ? 'selected' : '' }}>
+                                        Order Won</option>
+                                    <option value="Order Lost" {{ $lead->prospect_status == 'Order Lost' ? 'selected' : '' }}>
+                                        Order Lost</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Next
-                                    Follow-up Date (Optional)</label>
+                                    Follow-up Date</label>
                                 <input type="date" name="next_follow_up_date"
                                     class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-indigo-500 transition-all">
                             </div>
