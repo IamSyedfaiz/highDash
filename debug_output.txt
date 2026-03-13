@@ -1,0 +1,27 @@
+Current Time (IST): 2026-03-10 17:17:45
+Checking User: Tech Specialist (ID 5)
+Attendance ID: 11
+Work Duration Min: 444
+Status: present
+Total overlapping sessions found in DB: 2
+ - Session ID 21
+   DB Raw Login: 2026-03-10 09:51:20
+   DB Raw Logout: 2026-03-10 09:52:20
+   SessLogin (IST): 2026-03-10 09:51:20
+   SessLogout (IST): 2026-03-10 09:52:20
+   DayStart (IST): 2026-03-10 00:00:00
+   DayEnd (IST): 2026-03-10 23:59:59
+   Computed Start: 2026-03-10 09:51:20
+   Computed End: 2026-03-10 09:52:20
+   Seconds detected: -60
+ - Session ID 22
+   DB Raw Login: 2026-03-10 09:51:20
+   DB Raw Logout: NULL
+   SessLogin (IST): 2026-03-10 09:51:20
+   SessLogout (IST): 2026-03-10 17:17:45
+   DayStart (IST): 2026-03-10 00:00:00
+   DayEnd (IST): 2026-03-10 23:59:59
+   Computed Start: 2026-03-10 09:51:20
+   Computed End: 2026-03-10 17:17:45
+   Seconds detected: -26785
+Total Calculated Minutes: -448

@@ -31,7 +31,7 @@ class LogLogin
 
             $oldSess->update([
                 'logout_at' => $closingTime,
-                'duration_minutes' => max(0, (int) $closingTime->diffInMinutes($oldSess->login_at))
+                'duration_minutes' => abs((int) $closingTime->diffInMinutes($oldSess->login_at))
             ]);
         }
 

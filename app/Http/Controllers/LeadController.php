@@ -200,12 +200,16 @@ class LeadController extends Controller
                 'next_follow_up_date' => 'nullable|date|after_or_equal:today',
             ]);
 
-            $lead->followUps()->create([
+            $followUp = $lead->followUps()->create([
                 'user_id' => Auth::id(),
                 'status' => $validated['status'],
                 'message' => $validated['message'],
                 'next_follow_up_date' => $validated['next_follow_up_date'],
             ]);
+
+            if ($validated['next_follow_up_date']) {
+                Auth::user()->notify(new \App\Notifications\FollowUpReminder($followUp));
+            }
 
             // Update lead status to match follow up result
             $updateData = [

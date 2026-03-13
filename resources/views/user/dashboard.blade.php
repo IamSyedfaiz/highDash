@@ -9,57 +9,12 @@
             <p class="text-slate-500 dark:text-slate-400">Welcome back, {{ Auth::user()->name }}. Track your progress today.
             </p>
         </div>
-        <div class="bg-indigo-600 px-6 py-4 rounded-3xl shadow-xl shadow-indigo-500/20 text-white flex items-center gap-4">
-            <div class="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-100">Live Session Status (IST)</p>
-                @if($user->currentSession)
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span class="text-sm font-black text-white" id="live-timer-label">00h 00m 00s</span>
-                        </div>
-                        <div class="h-4 w-px bg-white/20"></div>
-                        <span class="text-[10px] font-bold text-indigo-200">Start:
-                            {{ $user->currentSession->login_at->format('h:i A') }}</span>
-                    </div>
-
-                    <script>
-                        (function () {
-                            const loginTime = new Date("{{ $user->currentSession->login_at->toIso8601String() }}").getTime();
-                            const timerLabel = document.getElementById('live-timer-label');
-
-                            function updateTimer() {
-                                const now = new Date().getTime();
-                                const diff = now - loginTime;
-
-                                if (diff < 0) return;
-
-                                const hours = Math.floor(diff / (1000 * 60 * 60));
-                                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                                timerLabel.innerText =
-                                    `${String(hours).padStart(2, '0')}h ` +
-                                    `${String(minutes).padStart(2, '0')}m ` +
-                                    `${String(seconds).padStart(2, '0')}s`;
-                            }
-
-                            setInterval(updateTimer, 1000);
-                            updateTimer();
-                        })();
-                    </script>
-                @else
-                    <div class="flex items-center gap-2">
-                        <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-                        <span class="text-sm font-black text-indigo-200">System Offline</span>
-                    </div>
-                @endif
+        <div class="hidden md:block text-right">
+            <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-1">Session Active</p>
+            <div class="flex items-center justify-end gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter">Monitoring
+                    System</span>
             </div>
         </div>
     </div>
@@ -126,31 +81,31 @@
             <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Operations Center</h3>
             <div class="grid grid-cols-2 gap-4">
                 @if(Auth::user()->hasRole('technical'))
-                <a href="{{ route('tasks.index') }}"
-                    class="p-6 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-[2rem] transition-all border border-transparent hover:border-indigo-100 group">
-                    <div
-                        class="p-3 bg-white dark:bg-slate-700 rounded-2xl mb-4 shadow-sm w-fit text-indigo-600 transition-transform group-hover:scale-110">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <p class="font-black text-slate-900 dark:text-white">Process Queue</p>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Active Buffer</p>
-                </a>
+                    <a href="{{ route('tasks.index') }}"
+                        class="p-6 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-[2rem] transition-all border border-transparent hover:border-indigo-100 group">
+                        <div
+                            class="p-3 bg-white dark:bg-slate-700 rounded-2xl mb-4 shadow-sm w-fit text-indigo-600 transition-transform group-hover:scale-110">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <p class="font-black text-slate-900 dark:text-white">Process Queue</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Active Buffer</p>
+                    </a>
                 @else
-                <a href="{{ route('leads.index', ['status' => 'New Lead']) }}"
-                    class="p-6 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-[2rem] transition-all border border-transparent hover:border-indigo-100 group">
-                    <div
-                        class="p-3 bg-white dark:bg-slate-700 rounded-2xl mb-4 shadow-sm w-fit text-indigo-600 transition-transform group-hover:scale-110">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1.01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                    </div>
-                    <p class="font-black text-slate-900 dark:text-white">Start Calling</p>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Access Lead Pool</p>
-                </a>
+                    <a href="{{ route('leads.index', ['status' => 'New Lead']) }}"
+                        class="p-6 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-[2rem] transition-all border border-transparent hover:border-indigo-100 group">
+                        <div
+                            class="p-3 bg-white dark:bg-slate-700 rounded-2xl mb-4 shadow-sm w-fit text-indigo-600 transition-transform group-hover:scale-110">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1.01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                        </div>
+                        <p class="font-black text-slate-900 dark:text-white">Start Calling</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Access Lead Pool</p>
+                    </a>
                 @endif
                 <a href="{{ route('attendance.index') }}"
                     class="p-6 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-[2rem] transition-all border border-transparent hover:border-emerald-100 group">
@@ -205,4 +160,70 @@
             </div>
         </div>
     </div>
+
+    @if(!Auth::user()->hasRole('technical'))
+        <!-- Today's Follow-ups -->
+        <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm mt-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">Today's Scheduled
+                        Follow-ups</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Priority Pipeline Activities
+                    </p>
+                </div>
+                <div
+                    class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl border border-indigo-100 dark:border-indigo-800">
+                    <span
+                        class="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{{ $todayFollowUps->count() }}
+                        DUETODAY</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse($todayFollowUps as $followUp)
+                    <div
+                        class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] border border-slate-100 dark:border-slate-800 group hover:border-indigo-300 transition-all">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div
+                                class="h-12 w-12 rounded-2xl bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 flex items-center justify-center text-indigo-600 shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-all transform group-hover:rotate-6">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1.01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p
+                                    class="text-sm font-black text-slate-900 dark:text-white leading-tight truncate group-hover:text-indigo-600">
+                                    {{ $followUp->lead->company_name }}</p>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter truncate">
+                                    {{ $followUp->lead->phone }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex flex-col">
+                                <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</span>
+                                <span class="text-[9px] font-bold text-slate-700 dark:text-slate-300">{{ $followUp->status }}</span>
+                            </div>
+                            <a href="{{ route('leads.show', $followUp->lead) }}"
+                                class="inline-flex items-center px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black rounded-xl uppercase tracking-widest hover:scale-105 transition-all">View
+                                Details</a>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="col-span-full py-16 text-center bg-slate-50/50 dark:bg-slate-800/30 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-800">
+                        <div
+                            class="h-16 w-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Clear Pipeline for Today</p>
+                        <p class="text-[9px] text-slate-500 font-bold mt-1">Excellent work! No missing follow-ups.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    @endif
 @endsection

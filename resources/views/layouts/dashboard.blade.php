@@ -108,7 +108,48 @@
                 </button>
 
                 <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 items-center">
-                    <div class="relative flex flex-1"></div>
+                    <div class="relative flex flex-1">
+                        @if ($currentSession = Auth::user()->currentSession)
+                            <div
+                                class="hidden md:flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Live
+                                        Session</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span class="text-xs font-black text-slate-900 dark:text-white"
+                                            id="global-live-timer">00:00:00</span>
+                                    </div>
+                                </div>
+                                <div class="h-8 w-px bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Started
+                                        At</span>
+                                    <span
+                                        class="text-xs font-black text-slate-600 dark:text-slate-300">{{ $currentSession->login_at->format('h:i A') }}</span>
+                                </div>
+                            </div>
+                            <script>
+                                (function () {
+                                    const loginTime = new Date("{{ $currentSession->login_at->toIso8601String() }}").getTime();
+                                    const timerLabel = document.getElementById('global-live-timer');
+
+                                    function updateTimer() {
+                                        const now = new Date().getTime();
+                                        const diff = now - loginTime;
+                                        if (diff < 0) return;
+                                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                                        timerLabel.innerText =
+                                            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                                    }
+                                    setInterval(updateTimer, 1000);
+                                    updateTimer();
+                                })();
+                            </script>
+                        @endif
+                    </div>
 
                     <!-- Theme Switcher -->
                     <button @click="darkMode = !darkMode; localStorage.setItem('theme', darkMode ? 'dark' : 'light')"
@@ -124,6 +165,76 @@
                                 d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25m-13.5 0h-2.25m15.364-7.364l-1.591 1.591M6.742 17.258l-1.591 1.591m12.728 0l-1.591-1.591M6.742 6.742L5.151 5.151M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
                         </svg>
                     </button>
+
+                    <!-- Notifications -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" type="button"
+                            class="p-2.5 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors relative">
+                            <span class="sr-only">View notifications</span>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            </svg>
+                            @if(Auth::user()->unreadNotifications->count() > 0)
+                                <span
+                                    class="absolute top-2 right-2 block h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900 animate-bounce"></span>
+                            @endif
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                            class="absolute right-0 z-50 mt-2.5 w-80 origin-top-right rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 focus:outline-none overflow-hidden">
+                            <div
+                                class="px-6 py-4 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                                <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                                    Alerts Center</h2>
+                                <span
+                                    class="text-[9px] font-bold text-slate-400">{{ Auth::user()->unreadNotifications->count() }}
+                                    New</span>
+                            </div>
+                            <div class="max-h-96 overflow-y-auto">
+                                @forelse(Auth::user()->unreadNotifications as $notification)
+                                    <a href="{{ isset($notification->data['lead_id']) ? route('leads.show', $notification->data['lead_id']) : '#' }}"
+                                        class="block px-6 py-5 hover:bg-slate-50 dark:hover:bg-indigo-900/10 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0"
+                                        @click="open = false">
+                                        <div class="flex gap-4">
+                                            <div
+                                                class="mt-1 h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p
+                                                    class="text-xs font-black text-slate-900 dark:text-white leading-tight mb-1">
+                                                    {{ $notification->data['company_name'] ?? 'System Notice' }}</p>
+                                                <p class="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
+                                                    {{ $notification->data['message'] }}</p>
+                                                <p
+                                                    class="text-[8px] text-slate-400 mt-2 uppercase font-black tracking-tighter">
+                                                    {{ $notification->created_at->diffForHumans() }}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="px-6 py-12 text-center">
+                                        <div
+                                            class="h-12 w-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <svg class="h-6 w-6 text-slate-300" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inbox is
+                                            Clear</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="h-6 w-px bg-slate-200 dark:border-slate-800"></div>
 

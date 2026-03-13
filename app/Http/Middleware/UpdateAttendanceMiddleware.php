@@ -61,7 +61,7 @@ class UpdateAttendanceMiddleware
                 $end = $sessLogout->lt($dayEnd) ? $sessLogout : $dayEnd;
 
                 if ($end->gt($start)) {
-                    $totalSeconds += (int) $end->diffInSeconds($start);
+                    $totalSeconds += abs((int) $end->diffInSeconds($start));
                 }
             }
 

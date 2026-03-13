@@ -64,6 +64,7 @@ class DashboardController extends Controller
                 'assignedLeadsCount' => $user->leads()->count(),
                 'newLeadsCount' => $user->leads()->where('status', 'New Lead')->count(),
                 'convertedLeadsCount' => $user->leads()->where('status', 'Existing')->count(),
+                'todayFollowUps' => $user->followUps()->whereDate('next_follow_up_date', $now->toDateString())->with('lead')->get(),
                 'taskStats' => [
                     'pending' => $user->tasks()->where('status', 'pending')->count(),
                     'started' => $user->tasks()->where('status', 'started')->count(),

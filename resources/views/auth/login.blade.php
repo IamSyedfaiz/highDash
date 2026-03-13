@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="h-full flex items-center justify-center p-4">
         <div
-            class="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+            class="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
             <!-- Decorative blur -->
             <div class="absolute -top-24 -left-24 h-48 w-48 bg-indigo-500/10 blur-[100px] rounded-full"></div>
             <div class="absolute -bottom-24 -right-24 h-48 w-48 bg-purple-500/10 blur-[100px] rounded-full"></div>
@@ -9,11 +9,8 @@
             <div class="relative z-10">
                 <div class="text-center mb-10">
                     <div
-                        class="h-16 w-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-3xl mx-auto flex items-center justify-center text-white mb-6 shadow-xl shadow-indigo-500/20 transform hover:scale-110 transition-transform">
-                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-1.17-1.951c.566-.879 1.102-1.849 1.581-2.908a11.077 11.077 0 00.342-3.712M12 11c0-3.517 1.009-6.799 2.753-9.571m1.17 1.951c-.566.879-1.102 1.849-1.581 2.908a11.077 11.077 0 00-.342 3.712M12 11c0-1.657-1.343-3-3-3s-3 1.343-3 3 1.343 3 3 3 3-1.343 3-3z" />
-                        </svg>
+                        class="h-28 w-60 mx-auto flex items-center justify-center transform hover:scale-110 transition-transform">
+                        <x-application-logo class="w-full h-full fill-current" />
                     </div>
                     <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">System Login</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium italic italic italic">Securely

@@ -62,16 +62,35 @@
                     <div class="text-center md:text-left">
                         <p class="text-indigo-100 text-xs font-bold uppercase tracking-widest mb-1">Today's Presence</p>
                         <h3 class="text-4xl font-black mb-2">{{ now('Asia/Kolkata')->format('M d, Y') }}</h3>
-                        <p class="text-indigo-100 flex items-center justify-center md:justify-start gap-2">
+                        <div class="flex items-center justify-center md:justify-start gap-4">
                             @php $currentSess = Auth::user()->currentSession; @endphp
                             @if($currentSess)
-                                <span class="h-3 w-3 rounded-full bg-emerald-400 animate-pulse border-2 border-white/20"></span>
-                                Status: <span class="font-black">Active In System</span>
+                                <div class="flex items-center gap-2 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-400/30">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span class="text-[10px] font-black uppercase tracking-widest" id="status-card-timer">00:00:00</span>
+                                </div>
+                                <script>
+                                    (function() {
+                                        const loginTime = new Date("{{ $currentSess->login_at->toIso8601String() }}").getTime();
+                                        const timerLabel = document.getElementById('status-card-timer');
+                                        function update() {
+                                            const diff = new Date().getTime() - loginTime;
+                                            if (diff < 0) return;
+                                            const h = Math.floor(diff / (1000 * 60 * 60));
+                                            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                            const s = Math.floor((diff % (1000 * 60)) / 1000);
+                                            timerLabel.innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                                        }
+                                        setInterval(update, 1000); update();
+                                    })();
+                                </script>
                             @else
-                                <span class="h-3 w-3 rounded-full bg-slate-400 border-2 border-white/20"></span>
-                                Status: <span class="font-bold opacity-75">Work Session Ended</span>
+                                <div class="flex items-center gap-2 bg-slate-500/20 px-3 py-1 rounded-full border border-slate-400/30">
+                                    <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                                    <span class="text-[10px] font-black uppercase tracking-widest opacity-75">Work Session Ended</span>
+                                </div>
                             @endif
-                        </p>
+                        </div>
                     </div>
                     <div class="flex gap-10">
                         <div class="text-center">
@@ -83,15 +102,36 @@
                         </div>
                         <div class="h-12 w-px bg-white/20 self-center"></div>
                         <div class="text-center">
-                            <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2">Last Activity
-                            </p>
+                            <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2">Today's Duration</p>
                             <p class="text-3xl font-black">
-                                {{ $today && $today->logout_at ? $today->logout_at->format('h:i A') : '--:--' }}</p>
+                                <span id="today-live-duration">--:--</span>
+                            </p>
                             <p class="text-[10px] text-indigo-300 mt-1 uppercase font-bold tracking-tighter">
-                                {{ $currentSess ? 'Active Now' : 'End of day' }}</p>
+                                {{ $currentSess ? 'Ticking Now' : 'Total Session Time' }}
+                            </p>
                         </div>
                     </div>
                 </div>
+                @if($today)
+                <script>
+                    (function() {
+                        const totalMinutesFinished = {{ $today->work_duration_minutes ?? 0 }};
+                        const currentSessionStart = {{ $currentSess ? "new Date('" . $currentSess->login_at->toIso8601String() . "').getTime()" : "null" }};
+                        const display = document.getElementById('today-live-duration');
+
+                        function update() {
+                            let totalSec = totalMinutesFinished * 60;
+                            if (currentSessionStart) {
+                                totalSec += Math.floor((new Date().getTime() - currentSessionStart) / 1000);
+                            }
+                            const h = Math.floor(totalSec / 3600);
+                            const m = Math.floor((totalSec % 3600) / 60);
+                            display.innerText = `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+                        }
+                        setInterval(update, 60000); update();
+                    })();
+                </script>
+                @endif
             </div>
 
             <!-- Monthly Stats Grid -->
@@ -106,16 +146,16 @@
                     </div>
                 </div>
                 <div
-                    class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl group">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Full Work Days</p>
-                    <div class="text-4xl font-black text-emerald-500">{{ $fullDays }}</div>
-                    <p class="text-[10px] text-slate-500 font-bold mt-1 tracking-tighter uppercase">Approved (>8H)</p>
+                    <div class="text-4xl font-black text-emerald-500 group-hover:scale-110 transition-transform origin-left">{{ $fullDays }}</div>
+                    <p class="text-[10px] text-slate-500 font-bold mt-1 tracking-tighter uppercase">Approved (>= 7H)</p>
                 </div>
                 <div
-                    class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl group">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Half Work Days</p>
-                    <div class="text-4xl font-black text-amber-500">{{ $halfDays }}</div>
-                    <p class="text-[10px] text-slate-500 font-bold mt-1 tracking-tighter uppercase">Standard (4H-8H)</p>
+                    <div class="text-4xl font-black text-amber-500 group-hover:scale-110 transition-transform origin-left">{{ $halfDays }}</div>
+                    <p class="text-[10px] text-slate-500 font-bold mt-1 tracking-tighter uppercase">Standard (< 7H)</p>
                 </div>
                 <div
                     class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -205,23 +245,17 @@
                                         </div>
                                     </td>
                                     <td class="px-10 py-6 whitespace-nowrap">
-                                        @if($att->work_duration_minutes >= 480)
+                                        @if($att->work_duration_minutes >= 420)
                                             <span
                                                 class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-800">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                                 Full Day
                                             </span>
-                                        @elseif($att->work_duration_minutes >= 240)
+                                        @else
                                             <span
                                                 class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-800">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                                                 Half Day
-                                            </span>
-                                        @else
-                                            <span
-                                                class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-800">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-                                                Regular
                                             </span>
                                         @endif
                                     </td>
