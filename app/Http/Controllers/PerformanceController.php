@@ -45,9 +45,16 @@ class PerformanceController extends Controller
                     ->groupBy('status', 'prospect_status')
                     ->get();
 
+                $untouchedLeadsCount = Lead::where('assigned_to', $cu->id)
+                    ->whereMonth('created_at', $month)
+                    ->whereYear('created_at', $year)
+                    ->doesntHave('followUps')
+                    ->count();
+
                 $cuStats = [
                     'user' => $cu,
                     'total' => $cu->leads_count,
+                    'untouched' => $untouchedLeadsCount,
                     'by_status' => $cuLeads->groupBy('status')->map->sum('count'),
                     'by_prospect' => $cuLeads->groupBy('prospect_status')->map->sum('count'),
                 ];

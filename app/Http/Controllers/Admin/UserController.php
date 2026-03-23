@@ -107,4 +107,25 @@ class UserController extends Controller
             return back()->withInput()->with('error', 'Failed to update user.');
         }
     }
+    public function leadStats(User $user, $date)
+    {
+        try {
+            $followUps = \App\Models\LeadFollowUp::where('user_id', $user->id)
+                ->whereDate('created_at', $date)
+                ->get();
+
+            $statusCounts = $followUps->groupBy('status')->map->count();
+
+            $notOpenCount = \App\Models\Lead::where('assigned_to', $user->id)
+                ->doesntHave('followUps')
+                ->count();
+
+            return response()->json([
+                'statuses' => $statusCounts,
+                'not_open' => $notOpenCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to load stats'], 500);
+        }
+    }
 }
