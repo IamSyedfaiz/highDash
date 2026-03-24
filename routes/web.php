@@ -21,6 +21,17 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/setup-godaddy', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        return "Setup successfully completed on GoDaddy! Migrations run, cache cleared, storage linked.";
+    } catch (\Exception $e) {
+        return "Error running setup: " . $e->getMessage() . "<br>Please ensure your database credentials in .env are correct.";
+    }
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

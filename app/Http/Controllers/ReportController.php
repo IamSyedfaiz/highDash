@@ -79,6 +79,11 @@ class ReportController extends Controller
             $attendances = $query->get();
             $filename = "attendance_report_" . date('Y-m-d') . ".csv";
 
+            if ($request->format === 'pdf') {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reports.attendance_pdf', compact('attendances'));
+                return $pdf->download("attendance_report_" . date('Y-m-d') . ".pdf");
+            }
+
             return response()->streamDownload(function () use ($attendances) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, ['User', 'Date', 'Clock In', 'Clock Out', 'Duration (Min)', 'Status']);

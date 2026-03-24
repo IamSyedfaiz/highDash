@@ -7,13 +7,21 @@
             <p class="text-slate-500 dark:text-slate-400">Comprehensive audit of user sessions and net work hours.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('admin.reports.export', request()->all()) }}"
+            <a href="{{ route('admin.reports.export', array_merge(request()->all(), ['format' => 'excel'])) }}"
                 class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all transform hover:-translate-y-1 uppercase tracking-widest">
                 <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Export Audit Data
+                Export Excel
+            </a>
+            <a href="{{ route('admin.reports.export', array_merge(request()->all(), ['format' => 'pdf'])) }}"
+                class="inline-flex items-center px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white text-sm font-black rounded-2xl shadow-xl shadow-rose-500/20 transition-all transform hover:-translate-y-1 uppercase tracking-widest">
+                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Export PDF
             </a>
         </div>
     </div>

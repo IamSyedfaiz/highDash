@@ -38,17 +38,25 @@ class UserController extends Controller
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
                 'roles' => ['required', 'array'],
             ]);
+
+            $randomPassword = \Illuminate\Support\Str::random(10); // Auto-generate secure password
 
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($randomPassword),
             ]);
 
             $user->roles()->attach($request->roles);
+
+            // Dispatch Email with logic
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserCreatedMail($user, $randomPassword));
+            } catch (\Exception $e) {
+                // Ignore mail failure for now, let it continue
+            }
 
             return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
