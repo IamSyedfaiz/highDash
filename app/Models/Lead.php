@@ -25,7 +25,11 @@ class Lead extends Model
         'prospect_status',
         'calling_status',
         'feedback',
-        'assigned_to'
+        'assigned_to',
+        'name',
+        'designation',
+        'add_distribution',
+        'keywords'
     ];
 
     public function assignedUser()

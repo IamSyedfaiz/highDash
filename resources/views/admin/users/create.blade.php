@@ -54,24 +54,7 @@
                 </div>
             </div>
 
-            <div
-                class="bg-indigo-50/50 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-800 p-8 space-y-6">
-                <h3
-                    class="text-lg font-bold text-indigo-900 dark:text-indigo-200 border-b border-indigo-100 dark:border-indigo-800 pb-4">
-                    Security</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Password *</label>
-                        <input type="password" name="password" required
-                            class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Confirm Password *</label>
-                        <input type="password" name="password_confirmation" required
-                            class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
-                    </div>
-                </div>
-            </div>
+
 
             <div
                 class="flex justify-end gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">

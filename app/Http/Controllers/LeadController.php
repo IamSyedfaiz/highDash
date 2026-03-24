@@ -41,6 +41,11 @@ class LeadController extends Controller
                     $query->where('assigned_to', $request->assigned_to);
                 }
             }
+            if ($request->has('untouched') && $request->untouched) {
+                // If they specify month/year from performance tab, we could filter by created_at.
+                // But generally doesn'tHave('followUps') is enough
+                $query->doesntHave('followUps');
+            }
 
             $leads = $query->latest()->paginate(15)->withQueryString();
             $users = User::all();
@@ -54,9 +59,6 @@ class LeadController extends Controller
     public function create()
     {
         try {
-            if (!Auth::user()->isAdmin() && !Auth::user()->hasRole('manager')) {
-                return redirect()->route('leads.index')->with('error', 'Unauthorized to create leads manually.');
-            }
             return view('leads.create');
         } catch (\Exception $e) {
             return back()->with('error', 'Unable to open lead creation form.');
@@ -66,12 +68,13 @@ class LeadController extends Controller
     public function store(Request $request)
     {
         try {
-            if (!Auth::user()->isAdmin() && !Auth::user()->hasRole('manager')) {
-                return redirect()->route('leads.index')->with('error', 'Unauthorized to create leads manually.');
-            }
             $validated = $request->validate([
                 'company_name' => 'required|string|max:255',
+                'name' => 'nullable|string|max:255',
                 'contact_name' => 'nullable|string|max:255',
+                'designation' => 'nullable|string|max:255',
+                'add_distribution' => 'nullable|string|max:255',
+                'keywords' => 'nullable|string',
                 'email' => 'nullable|email',
                 'phone' => 'required|string',
                 'phone_1' => 'nullable|string',
@@ -84,7 +87,11 @@ class LeadController extends Controller
             ]);
 
             Lead::create($validated);
-            return redirect()->route('leads.index')->with('success', 'Lead created successfully.');
+
+            if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager') || Auth::user()->hasRole('calling')) {
+                return redirect()->route('leads.index')->with('success', 'Lead created successfully.');
+            }
+            return redirect()->route('dashboard')->with('success', 'Lead created successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -116,7 +123,11 @@ class LeadController extends Controller
         try {
             $validated = $request->validate([
                 'company_name' => 'required|string|max:255',
+                'name' => 'nullable|string|max:255',
                 'contact_name' => 'nullable|string|max:255',
+                'designation' => 'nullable|string|max:255',
+                'add_distribution' => 'nullable|string|max:255',
+                'keywords' => 'nullable|string',
                 'email' => 'nullable|email',
                 'phone' => 'required|string',
                 'phone_1' => 'nullable|string',

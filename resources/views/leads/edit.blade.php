@@ -35,6 +35,27 @@
                         <input type="text" name="contact_name" value="{{ old('contact_name', $lead->contact_name) }}"
                             class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                     </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Name</label>
+                        <input type="text" name="name" value="{{ old('name', $lead->name) }}"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Designation</label>
+                        <input type="text" name="designation" value="{{ old('designation', $lead->designation) }}"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Add Distribution</label>
+                        <input type="text" name="add_distribution"
+                            value="{{ old('add_distribution', $lead->add_distribution) }}"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Keywords</label>
+                        <textarea name="keywords" rows="2"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">{{ old('keywords', $lead->keywords) }}</textarea>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -101,15 +122,13 @@
                             <option value="">None</option>
                             <option value="Call Answered" {{ $lead->calling_status == 'Call Answered' ? 'selected' : '' }}>
                                 Call Answered</option>
-                            <option value="Busy / Callback"
-                                {{ $lead->calling_status == 'Busy / Callback' ? 'selected' : '' }}>Busy / Callback</option>
+                            <option value="Busy / Callback" {{ $lead->calling_status == 'Busy / Callback' ? 'selected' : '' }}>Busy / Callback</option>
                             <option value="Not Answered" {{ $lead->calling_status == 'Not Answered' ? 'selected' : '' }}>
                                 Not
                                 Answered</option>
                             <option value="Interested" {{ $lead->calling_status == 'Interested' ? 'selected' : '' }}>
                                 Interested</option>
-                            <option value="Not Interested"
-                                {{ $lead->calling_status == 'Not Interested' ? 'selected' : '' }}>
+                            <option value="Not Interested" {{ $lead->calling_status == 'Not Interested' ? 'selected' : '' }}>
                                 Not Interested</option>
                             <option value="Switched Off" {{ $lead->calling_status == 'Switched Off' ? 'selected' : '' }}>
                                 Switched Off</option>
