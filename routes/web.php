@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Specific
     Route::middleware('role:admin,manager')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
+        Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggleActive');
         Route::get('users/{user}/attendance/{date}/lead-stats', [UserController::class, 'leadStats'])->name('users.attendance.leadStats');
         Route::resource('roles', RoleController::class);
         Route::resource('leaves', LeaveRequestController::class);

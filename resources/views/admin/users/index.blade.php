@@ -62,11 +62,15 @@
                                 </div>
                             </td>
                             <td class="px-8 py-6 whitespace-nowrap">
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-                                    <span class="h-1 w-1 rounded-full bg-emerald-500"></span>
-                                    Active
-                                </span>
+                                @if($user->is_active)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                                        <span class="h-1 w-1 rounded-full bg-emerald-500"></span> Active
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+                                        <span class="h-1 w-1 rounded-full bg-rose-500"></span> Inactive
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-8 py-6 whitespace-nowrap text-sm text-slate-500 font-medium">
                                 {{ $user->created_at->format('M d, Y') }}
@@ -89,6 +93,25 @@
                                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
                                     </a>
+                                    @if(auth()->id() !== $user->id)
+                                    <form action="{{ route('admin.users.toggleActive', $user->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" 
+                                            class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl {{ $user->is_active ? 'text-rose-400 hover:text-rose-600 hover:border-rose-200' : 'text-emerald-400 hover:text-emerald-600 hover:border-emerald-200' }} transition shadow-sm"
+                                            title="{{ $user->is_active ? 'Deactivate User' : 'Activate User' }}">
+                                            @if($user->is_active)
+                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                </svg>
+                                            @else
+                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            @endif
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

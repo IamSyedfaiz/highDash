@@ -113,8 +113,8 @@ class DummyDataSeeder extends Seeder
             for ($i = 0; $i < 5; $i++) {
                 $tasks[] = [
                     'user_id' => $user->id,
-                    'created_by' => collect($userIds)->random(),
-                    'title' => $faker->sentence,
+                    'created_by' => $userIds[array_rand($userIds)],
+                    'title' => substr($faker->sentence, 0, 255),
                     'description' => $faker->paragraph,
                     'url' => $faker->url,
                     'status' => $faker->randomElement(['pending', 'started', 'closed']),
@@ -155,14 +155,14 @@ class DummyDataSeeder extends Seeder
         for ($i = 0; $i < $totalLeads / $batchSize; $i++) {
             $leads = [];
             for ($j = 0; $j < $batchSize; $j++) {
-                $assignedTo = collect($userIds)->random();
+                $assignedTo = $userIds[array_rand($userIds)];
                 $leads[] = [
-                    'company_name' => collect([$faker->company])->first(),
-                    'name' => collect([$faker->name])->first(),
-                    'contact_name' => collect([$faker->name])->first(),
-                    'designation' => collect([$faker->jobTitle])->first(),
-                    'add_distribution' => collect([$faker->word])->first(),
-                    'keywords' => collect([$faker->word])->first(),
+                    'company_name' => substr($faker->company, 0, 255),
+                    'name' => substr($faker->name, 0, 255),
+                    'contact_name' => substr($faker->name, 0, 255),
+                    'designation' => substr($faker->jobTitle, 0, 255),
+                    'add_distribution' => substr($faker->word, 0, 255),
+                    'keywords' => substr($faker->word, 0, 255),
                     'email' => $faker->unique()->safeEmail,
                     'phone' => substr($faker->phoneNumber, 0, 15),
                     'phone_1' => substr($faker->phoneNumber, 0, 15),
@@ -191,8 +191,8 @@ class DummyDataSeeder extends Seeder
         foreach ($leadIds as $id) {
             $followUps[] = [
                 'lead_id' => $id,
-                'user_id' => collect($userIds)->random(),
-                'status' => collect($callingStatuses)->random(),
+                'user_id' => $userIds[array_rand($userIds)],
+                'status' => $callingStatuses[array_rand($callingStatuses)],
                 'message' => 'Dummy Follow-up',
                 'next_follow_up_date' => Carbon::now()->addDays(rand(1, 5)),
                 'created_at' => Carbon::now()->subDays(rand(0, 3)),
