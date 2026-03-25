@@ -55,7 +55,7 @@ class UserController extends Controller
             try {
                 \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserCreatedMail($user, $randomPassword));
             } catch (\Exception $e) {
-                // Ignore mail failure for now, let it continue
+                \Illuminate\Support\Facades\Log::error('Mailing failed on User Creation: ' . $e->getMessage());
             }
 
             return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
@@ -118,15 +118,11 @@ class UserController extends Controller
     public function leadStats(User $user, $date)
     {
         try {
-            $followUps = \App\Models\LeadFollowUp::where('user_id', $user->id)
-                ->whereDate('created_at', $date)
-                ->get();
+            $followUps = \App\Models\LeadFollowUp::where('user_id', $user->id)->whereDate('created_at', $date)->get();
 
             $statusCounts = $followUps->groupBy('status')->map->count();
 
-            $notOpenCount = \App\Models\Lead::where('assigned_to', $user->id)
-                ->doesntHave('followUps')
-                ->count();
+            $notOpenCount = \App\Models\Lead::where('assigned_to', $user->id)->doesntHave('followUps')->count();
 
             return response()->json([
                 'statuses' => $statusCounts,
@@ -134,6 +130,22 @@ class UserController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to load stats'], 500);
+        }
+    }
+
+    public function toggleActive(User $user)
+    {
+        try {
+            // Prevent admin from deactivating themselves if necessary? Maybe skip that logic for now or add a quick check
+            if ($user->id === auth()->id()) {
+                return back()->with('error', 'You cannot deactivate yourself.');
+            }
+
+            $user->update(['is_active' => !$user->is_active]);
+            $status = $user->is_active ? 'activated' : 'deactivated';
+            return back()->with('success', "User successfully {$status}.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to change user status.');
         }
     }
 }

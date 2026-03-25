@@ -71,7 +71,8 @@
                                 </div>
                                 <script>
                                     (function() {
-                                        const loginTime = new Date("{{ $currentSess->login_at->toIso8601String() }}").getTime();
+                                        // Use native PHP timestamp to bypass JS timezone biases which causes 5.5hr offset bugs
+                                        const loginTime = {{ $currentSess->login_at->getTimestamp() * 1000 }};
                                         const timerLabel = document.getElementById('status-card-timer');
                                         function update() {
                                             const diff = new Date().getTime() - loginTime;
@@ -116,13 +117,14 @@
                 <script>
                     (function() {
                         const totalMinutesFinished = {{ $today->work_duration_minutes ?? 0 }};
-                        const currentSessionStart = {{ $currentSess ? "new Date('" . $currentSess->login_at->toIso8601String() . "').getTime()" : "null" }};
+                        const currentSessionStart = {{ $currentSess ? $currentSess->login_at->getTimestamp() * 1000 : 'null' }};
                         const display = document.getElementById('today-live-duration');
 
                         function update() {
                             let totalSec = totalMinutesFinished * 60;
                             if (currentSessionStart) {
-                                totalSec += Math.floor((new Date().getTime() - currentSessionStart) / 1000);
+                                let sessionDiff = Math.floor((new Date().getTime() - currentSessionStart) / 1000);
+                                if(sessionDiff > 0) totalSec += sessionDiff;
                             }
                             const h = Math.floor(totalSec / 3600);
                             const m = Math.floor((totalSec % 3600) / 60);
