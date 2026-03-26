@@ -15,7 +15,7 @@ class LeadController extends Controller
             $user = Auth::user();
             $query = Lead::with('assignedUser');
 
-            if ($user->hasRole('calling')) {
+            if ($user->hasRole(['sales', 'inside_sales', 'field_sales'])) {
                 $query->where('assigned_to', $user->id);
             }
 
@@ -88,7 +88,7 @@ class LeadController extends Controller
 
             Lead::create($validated);
 
-            if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager') || Auth::user()->hasRole('calling')) {
+            if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager') || Auth::user()->hasRole(['sales', 'inside_sales', 'field_sales'])) {
                 return redirect()->route('leads.index')->with('success', 'Lead created successfully.');
             }
             return redirect()->route('dashboard')->with('success', 'Lead created successfully.');

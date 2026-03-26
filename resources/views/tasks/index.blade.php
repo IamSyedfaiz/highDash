@@ -7,13 +7,13 @@
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Technical Task Ledger</h1>
                 <p class="text-slate-500 dark:text-slate-400 font-medium">Daily organized technical implementation tasks.</p>
             </div>
-            <button @click="showModal = true"
+            <a href="{{ route('tasks.create') }}"
                 class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-2xl shadow-xl shadow-indigo-500/20 transition-all transform hover:-translate-y-1 uppercase tracking-widest">
                 <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
                 </svg>
                 New Entry
-            </button>
+            </a>
         </div>
 
         @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
@@ -93,7 +93,13 @@
                                         <td class="px-8 py-5 min-w-[300px]">
                                             <div class="mb-1 flex items-center gap-2">
                                                 <span class="text-sm font-black text-slate-900 dark:text-white">{{ $task->title }}</span>
-                                                @if($task->url)
+                                                @if($task->urls && count($task->urls) > 0)
+                                                    @foreach($task->urls as $url)
+                                                    <a href="{{ $url }}" target="_blank" class="text-indigo-500 hover:text-indigo-700 transition-all">
+                                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                    </a>
+                                                    @endforeach
+                                                @elseif($task->url)
                                                     <a href="{{ $task->url }}" target="_blank" class="text-indigo-500 hover:text-indigo-700 transition-all">
                                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                                     </a>
@@ -150,52 +156,7 @@
             {{ $tasks->links() }}
         </div>
 
-        <!-- Create Task Modal -->
-        <template x-teleport="body">
-            <div x-show="showModal" class="fixed inset-0 z-[100] overflow-y-auto" x-cloak>
-                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                    <div @click="showModal = false" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-                    <div class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-[2.5rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-200 dark:border-slate-800">
-                        <form action="{{ route('tasks.store') }}" method="POST" class="p-10">
-                            @csrf
-                            <h3 class="text-2xl font-black text-slate-900 dark:text-white mb-8 uppercase tracking-tight">New Task Entry</h3>
-                            <div class="space-y-6">
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Title</label>
-                                    <input type="text" name="title" required placeholder="Main task objective..." class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Task Date</label>
-                                    <input type="date" name="task_date" value="{{ date('Y-m-d') }}" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
-                                    <textarea name="description" rows="3" placeholder="Context or specifics..." class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 font-bold"></textarea>
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reference URL</label>
-                                    <input type="url" name="url" placeholder="https://..." class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
-                                </div>
-                                @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assignee</label>
-                                    <select name="user_id" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 font-bold transition-all">
-                                        @foreach($users as $u)
-                                            <option value="{{ $u->id }}" {{ $u->id == Auth::id() ? 'selected' : '' }}>{{ $u->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                @endif
-                            </div>
-                            <div class="mt-8 flex justify-end gap-3">
-                                <button type="button" @click="showModal = false" class="px-6 py-3 text-xs font-black text-slate-500 uppercase tracking-widest rounded-xl hover:bg-slate-100 transition-all">Cancel</button>
-                                <button type="submit" class="px-8 py-3 bg-indigo-600 text-white text-xs font-black rounded-xl shadow-lg shadow-indigo-500/20 uppercase tracking-widest hover:bg-indigo-700 transition-all">Commit Task</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </template>
+        <!-- Modal removed intentionally -->
     </div>
 
     <div class="mt-10">

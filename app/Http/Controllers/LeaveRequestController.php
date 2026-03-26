@@ -10,13 +10,32 @@ use Carbon\Carbon;
 
 class LeaveRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = Auth::user();
             if ($user->isAdmin()) {
-                $leaves = LeaveRequest::with('user')->latest()->get();
-                return view('admin.leaves.index', compact('leaves'));
+                $query = LeaveRequest::with('user')->latest();
+
+                if ($request->has('user_id') && $request->user_id) {
+                    $query->where('user_id', $request->user_id);
+                }
+
+                if ($request->has('date') && $request->date) {
+                    $query->whereDate('from_date', '<=', $request->date)
+                        ->whereDate('to_date', '>=', $request->date);
+                }
+
+                if ($request->has('role_id') && $request->role_id) {
+                    $query->whereHas('user.roles', function ($q) use ($request) {
+                        $q->where('roles.id', $request->role_id);
+                    });
+                }
+
+                $leaves = $query->paginate(20)->withQueryString();
+                $users = \App\Models\User::orderBy('name')->get();
+                $roles = \App\Models\Role::all();
+                return view('admin.leaves.index', compact('leaves', 'users', 'roles'));
             }
 
             $leaves = LeaveRequest::where('user_id', $user->id)->latest()->get();

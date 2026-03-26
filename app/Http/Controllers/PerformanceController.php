@@ -22,9 +22,9 @@ class PerformanceController extends Controller
 
         // Calling Team Data (Leads)
         $callingStats = [];
-        if ($isAdmin || $user->hasRole('calling')) {
+        if ($isAdmin || $user->hasRole(['sales', 'inside_sales', 'field_sales'])) {
             $callingQuery = User::whereHas('roles', function ($q) {
-                $q->where('slug', 'calling');
+                $q->whereIn('slug', ['sales', 'inside_sales', 'field_sales']);
             });
 
             if (!$isAdmin) {

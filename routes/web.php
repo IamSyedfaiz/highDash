@@ -45,7 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('leads', [LeadController::class, 'store'])->name('leads.store');
 
     // Lead Management (Calling Team & Admins)
-    Route::middleware('role:admin,manager,calling')->group(function () {
+    Route::middleware('role:admin,manager,sales,inside_sales,field_sales')->group(function () {
         Route::resource('leads', LeadController::class)->except(['create', 'store']);
         Route::post('leads/{lead}/quick-update', [LeadController::class, 'quickUpdate'])->name('leads.quickUpdate');
         Route::post('leads/{lead}/followups', [LeadController::class, 'storeFollowUp'])->name('leads.followups.store');
@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggleActive');
         Route::get('users/{user}/attendance/{date}/lead-stats', [UserController::class, 'leadStats'])->name('users.attendance.leadStats');
         Route::resource('roles', RoleController::class);
+        Route::resource('holidays', App\Http\Controllers\Admin\HolidayController::class)->only(['index', 'store', 'destroy']);
         Route::resource('leaves', LeaveRequestController::class);
 
         Route::patch('leaves/{leave}/status', [LeaveRequestController::class, 'updateStatus'])->name('leaves.updateStatus');

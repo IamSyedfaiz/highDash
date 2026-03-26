@@ -53,6 +53,9 @@ class User extends Authenticatable
 
     public function hasRole($role)
     {
+        if (is_array($role)) {
+            return $this->roles->whereIn('slug', $role)->count() > 0;
+        }
         if (is_string($role)) {
             return $this->roles->contains('slug', $role);
         }
