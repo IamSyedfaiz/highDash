@@ -81,6 +81,14 @@ class LeaveRequestController extends Controller
                 'model_id' => $leave->id,
             ]);
 
+            $adminUser = \App\Models\User::whereHas('roles', function ($q) {
+                $q->where('slug', 'admin'); })->first();
+            $adminEmail = $adminUser ? $adminUser->email : config('mail.from.address');
+
+            if ($adminEmail) {
+                \Illuminate\Support\Facades\Mail::to($adminEmail)->send(new \App\Mail\LeaveRequestedMail($leave));
+            }
+
             return redirect()->route('leaves.index')->with('success', 'Leave request submitted successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -109,6 +117,10 @@ class LeaveRequestController extends Controller
                 'model_type' => LeaveRequest::class,
                 'model_id' => $leave->id,
             ]);
+
+            if ($leave->user->email) {
+                \Illuminate\Support\Facades\Mail::to($leave->user->email)->send(new \App\Mail\LeaveStatusUpdatedMail($leave));
+            }
 
             return redirect()->back()->with('success', 'Leave status updated successfully.');
         } catch (\Exception $e) {

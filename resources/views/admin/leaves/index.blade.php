@@ -3,8 +3,15 @@
 @section('title', 'Manage Leaves')
 
 @section('content')
-    <div class="mb-8 font-bold text-2xl text-slate-900 flex justify-between items-center">
-        <span>Manage Leave Requests</span>
+    <div class="mb-10 flex justify-between items-end border-b border-slate-100 pb-8">
+        <div>
+            <h1 class="text-3xl font-black text-slate-900 uppercase tracking-tight">MANAGE LEAVE REQUESTS</h1>
+            <p class="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Review and update employee leave
+                applications</p>
+        </div>
+    </div>
+
+    <div class="mb-6">
         <form method="GET" action="{{ route('admin.leaves.index') }}" class="flex gap-3 text-sm font-normal items-center">
             <input type="date" name="date" value="{{ request('date') }}" class="rounded-xl border-slate-200">
             <select name="role_id" class="rounded-xl border-slate-200">
@@ -65,7 +72,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="px-2.5 py-0.5 rounded-full text-xs font-semibold 
-                                            {{ $leave->status === 'approved' ? 'bg-emerald-100 text-emerald-800' : ($leave->status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
+                                                            {{ $leave->status === 'approved' ? 'bg-emerald-100 text-emerald-800' : ($leave->status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
                                     {{ ucfirst($leave->status) }}
                                 </span>
                             </td>

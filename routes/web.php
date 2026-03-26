@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/attendance/export', [AttendanceController::class, 'export'])->name('attendance.export');
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
+    Route::get('/follow-ups', [ReportController::class, 'followUpsReport'])->name('follow_ups.index');
     Route::resource('leaves', LeaveRequestController::class);
 
     // Admin Specific

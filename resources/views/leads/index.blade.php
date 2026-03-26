@@ -54,15 +54,11 @@
                 <select name="status"
                     class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                     <option value="">All Statuses</option>
-                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="Unassigned" {{ request('status') == 'Unassigned' ? 'selected' : '' }}>Unassigned</option>
-                    <option value="Prospect" {{ request('status') == 'Prospect' ? 'selected' : '' }}>Prospect</option>
-                    <option value="Approach" {{ request('status') == 'Approach' ? 'selected' : '' }}>Approach</option>
-                    <option value="Negotiable" {{ request('status') == 'Negotiable' ? 'selected' : '' }}>Negotiable</option>
-                    <option value="Order won" {{ request('status') == 'Order won' ? 'selected' : '' }}>Order won</option>
-                    <option value="New Lead" {{ request('status') == 'New Lead' ? 'selected' : '' }}>New Lead</option>
-                    <option value="Existing" {{ request('status') == 'Existing' ? 'selected' : '' }}>Existing</option>
-                    <option value="Order Lost" {{ request('status') == 'Order Lost' ? 'selected' : '' }}>Order Lost</option>
+                    @foreach(\App\Models\Lead::STATUSES as $statusOption)
+                        <option value="{{ $statusOption }}" {{ request('status') == $statusOption ? 'selected' : '' }}>
+                            {{ $statusOption }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
             <div class="space-y-1">
@@ -134,9 +130,6 @@
                             Status</th>
                         <th
                             class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                            Pipeline</th>
-                        <th
-                            class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Assigned To</th>
                         <th
                             class="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -175,38 +168,26 @@
                             <td class="px-6 py-5 whitespace-nowrap">
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
-                                                                                            @if($lead->status === 'Pending') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
-                                                                                            @elseif($lead->status === 'Prospect') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
-                                                                                            @elseif($lead->status === 'Approach') bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400
-                                                                                            @elseif($lead->status === 'Negotiable') bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400
-                                                                                            @elseif($lead->status === 'Order won' || $lead->status === 'New Lead') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400
-                                                                                            @elseif($lead->status === 'Existing') bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400
-                                                                                            @else bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 @endif">
+                                                                                                            @if($lead->status === 'Pending') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
+                                                                                                            @elseif($lead->status === 'Prospect') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                                                                                            @elseif($lead->status === 'Approach') bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400
+                                                                                                            @elseif($lead->status === 'Negotiable') bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400
+                                                                                                            @elseif($lead->status === 'Order won' || $lead->status === 'New Lead') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400
+                                                                                                            @elseif($lead->status === 'Existing') bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400
+                                                                                                            @else bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 @endif">
                                     <span
                                         class="h-1.5 w-1.5 rounded-full mr-2 
-                                                                                                @if($lead->status === 'Pending') bg-amber-400
-                                                                                                @elseif($lead->status === 'Prospect') bg-blue-400
-                                                                                                @elseif($lead->status === 'Approach') bg-indigo-400
-                                                                                                @elseif($lead->status === 'Negotiable') bg-violet-400
-                                                                                                @elseif($lead->status === 'Order won' || $lead->status === 'New Lead') bg-emerald-400
-                                                                                                @elseif($lead->status === 'Existing') bg-slate-400
-                                                                                                @else bg-rose-400 @endif"></span>
+                                                                                                                @if($lead->status === 'Pending') bg-amber-400
+                                                                                                                @elseif($lead->status === 'Prospect') bg-blue-400
+                                                                                                                @elseif($lead->status === 'Approach') bg-indigo-400
+                                                                                                                @elseif($lead->status === 'Negotiable') bg-violet-400
+                                                                                                                @elseif($lead->status === 'Order won' || $lead->status === 'New Lead') bg-emerald-400
+                                                                                                                @elseif($lead->status === 'Existing') bg-slate-400
+                                                                                                                @else bg-rose-400 @endif"></span>
                                     {{ $lead->status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-5 whitespace-nowrap">
-                                @if($lead->prospect_status && $lead->prospect_status !== 'None')
-                                                <span
-                                                    class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter
-                                                                                        {{ $lead->prospect_status === 'Order Won' ? 'bg-emerald-100 text-emerald-800' :
-                                    ($lead->prospect_status === 'Order Lost' ? 'bg-rose-100 text-rose-800' :
-                                        ($lead->prospect_status === 'Negotiable' ? 'bg-violet-100 text-violet-800' : 'bg-indigo-100 text-indigo-800')) }}">
-                                                    {{ $lead->prospect_status }}
-                                                </span>
-                                @else
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Initial</span>
-                                @endif
-                            </td>
+
                             <td class="px-6 py-5 whitespace-nowrap">
                                 @if($lead->assignedUser)
                                     <div class="flex items-center">

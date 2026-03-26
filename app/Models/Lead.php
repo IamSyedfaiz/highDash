@@ -9,6 +9,26 @@ class Lead extends Model
 {
     use HasFactory;
 
+    public const STATUSES = [
+        'NOT OPEN',
+        'WRNG NO',
+        'CALLBACK',
+        'CALLBACK_UNI',
+        'CALLBACK PC',
+        'CO_CLOSED',
+        'NON TARGET',
+        'TELEDUM',
+        'TELEDMUFLWP',
+        'CRM APPMT',
+        'E_APPMT',
+        'GREAT PGIFC',
+        'A LOT OF PGIFU',
+        'VIDEO OMU',
+        'VIDEO PG',
+        'CB_POST_DMU',
+        'CB_POST PG'
+    ];
+
     protected $fillable = [
         'company_name',
         'contact_name',

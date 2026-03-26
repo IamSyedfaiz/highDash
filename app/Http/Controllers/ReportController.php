@@ -38,6 +38,32 @@ class ReportController extends Controller
         }
     }
 
+    public function followUpsReport(Request $request)
+    {
+        try {
+            $user = \Illuminate\Support\Facades\Auth::user();
+
+            $query = \App\Models\LeadFollowUp::whereNotNull('next_follow_up_date')
+                ->where('next_follow_up_date', '>=', \Carbon\Carbon::now()->startOfDay())
+                ->with(['lead', 'user']);
+
+            if (!$user->isAdmin() && !$user->hasRole('manager')) {
+                $query->whereHas('lead', function ($q) use ($user) {
+                    $q->where('assigned_to', $user->id);
+                });
+            }
+
+            $followUps = $query->orderBy('next_follow_up_date', 'asc')->get();
+            $groupedFollowUps = $followUps->unique('lead_id')->groupBy(function ($item) {
+                return $item->lead->assignedUser->id ?? 0;
+            });
+
+            return view('reports.follow_ups', compact('groupedFollowUps'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load follow ups report.');
+        }
+    }
+
     public function userPerformance(User $user, Request $request)
     {
         try {

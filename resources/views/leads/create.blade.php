@@ -71,9 +71,9 @@
                         </select>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lead Source</label>
-                        <input type="text" name="lead_source" value="{{ old('lead_source') }}"
-                            placeholder="e.g. Website, Reference"
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Company Website</label>
+                        <input type="url" name="lead_source" value="{{ old('lead_source') }}"
+                            placeholder="https://example.com"
                             class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                     </div>
                 </div>

@@ -41,6 +41,13 @@ class LeadController extends Controller
                     $query->where('assigned_to', $request->assigned_to);
                 }
             }
+            if ($request->has('follow_up_status')) {
+                $query->whereHas('followUps', function ($q) use ($request) {
+                    $q->where('status', $request->follow_up_status)
+                        ->whereNotNull('next_follow_up_date')
+                        ->where('next_follow_up_date', '>=', now()->startOfDay());
+                });
+            }
             if ($request->has('untouched') && $request->untouched) {
                 // If they specify month/year from performance tab, we could filter by created_at.
                 // But generally doesn'tHave('followUps') is enough
@@ -205,8 +212,7 @@ class LeadController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => 'required|in:Call Answered,Busy / Callback,Not Answered,Interested,Not Interested,Switched Off,Wrong Number',
-                'prospect_status' => 'nullable|in:Approach,Negotiable,Order Won,Order Lost,None',
+                'status' => 'required|string',
                 'message' => 'required|string',
                 'next_follow_up_date' => 'nullable|date|after_or_equal:today',
             ]);
@@ -222,18 +228,14 @@ class LeadController extends Controller
                 Auth::user()->notify(new \App\Notifications\FollowUpReminder($followUp));
             }
 
-            // Update lead status to match follow up result
+            // Update lead status to match follow up result and the feedback
             $updateData = [
-                'calling_status' => $validated['status'],
+                'status' => collect(['NOT OPEN', 'WRNG NO', 'CALLBACK', 'CALLBACK_UNI', 'CALLBACK PC', 'CO_CLOSED', 'NON TARGET', 'TELEDUM', 'TELEDMUFLWP', 'CRM APPMT', 'E_APPMT', 'GREAT PGIFC', 'A LOT OF PGIFU', 'VIDEO OMU', 'VIDEO PG', 'CB_POST_DMU', 'CB_POST PG'])->contains($validated['status']) ? $validated['status'] : $validated['status'],
                 'feedback' => $validated['message']
             ];
 
-            if (isset($validated['prospect_status'])) {
-                $updateData['prospect_status'] = $validated['prospect_status'];
-            }
-
             if ($request->has('update_lead_status') && $request->update_lead_status === 'drop') {
-                $updateData['status'] = 'Pending';
+                $updateData['status'] = 'Drop';
                 $updateData['assigned_to'] = null;
             }
 

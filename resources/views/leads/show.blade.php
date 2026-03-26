@@ -150,37 +150,16 @@
                 <div class="p-8">
                     <form action="{{ route('leads.followups.store', $lead->id) }}" method="POST" class="space-y-6">
                         @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Call
                                     Result / Status</label>
                                 <select name="status" required
                                     class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer">
                                     <option value="">Select Outcome...</option>
-                                    <option value="Call Answered">Call Answered ✅</option>
-                                    <option value="Busy / Callback">Busy / Callback 📵</option>
-                                    <option value="Not Answered">Not Answered ❌</option>
-                                    <option value="Interested">Interested ⭐</option>
-                                    <option value="Not Interested">Not Interested 👎</option>
-                                    <option value="Switched Off">Switched Off 🔋</option>
-                                    <option value="Wrong Number">Wrong Number 🚫</option>
-                                </select>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Prospect
-                                    Pipeline</label>
-                                <select name="prospect_status"
-                                    class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer">
-                                    <option value="None" {{ $lead->prospect_status == 'None' ? 'selected' : '' }}>None
-                                    </option>
-                                    <option value="Approach" {{ $lead->prospect_status == 'Approach' ? 'selected' : '' }}>
-                                        Approach</option>
-                                    <option value="Negotiable" {{ $lead->prospect_status == 'Negotiable' ? 'selected' : '' }}>
-                                        Negotiable</option>
-                                    <option value="Order Won" {{ $lead->prospect_status == 'Order Won' ? 'selected' : '' }}>
-                                        Order Won</option>
-                                    <option value="Order Lost" {{ $lead->prospect_status == 'Order Lost' ? 'selected' : '' }}>
-                                        Order Lost</option>
+                                    @foreach(\App\Models\Lead::STATUSES as $st)
+                                        <option value="{{ $st }}">{{ $st }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="space-y-2">

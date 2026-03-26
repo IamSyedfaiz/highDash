@@ -76,8 +76,8 @@
                         </select>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lead Source</label>
-                        <input type="text" name="lead_source" value="{{ old('lead_source', $lead->lead_source) }}"
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Company Website</label>
+                        <input type="url" name="lead_source" value="{{ old('lead_source', $lead->lead_source) }}"
                             class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                     </div>
                 </div>
@@ -91,50 +91,13 @@
                     Internal Workflow</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Overall Status</label>
+                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Lead Source</label>
                         <select name="status"
                             class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
                             <option value="Pending" {{ $lead->status == 'Pending' ? 'selected' : '' }}>Pending</option>
                             <option value="New Lead" {{ $lead->status == 'New Lead' ? 'selected' : '' }}>New Lead</option>
                             <option value="Existing" {{ $lead->status == 'Existing' ? 'selected' : '' }}>Existing</option>
                             <option value="Drop" {{ $lead->status == 'Drop' ? 'selected' : '' }}>Drop (Unassign)</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Prospect</label>
-                        <select name="prospect_status"
-                            class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                            <option value="None" {{ $lead->prospect_status == 'None' ? 'selected' : '' }}>None</option>
-                            <option value="Approach" {{ $lead->prospect_status == 'Approach' ? 'selected' : '' }}>Approach
-                            </option>
-                            <option value="Negotiable" {{ $lead->prospect_status == 'Negotiable' ? 'selected' : '' }}>
-                                Negotiable</option>
-                            <option value="Order Won" {{ $lead->prospect_status == 'Order Won' ? 'selected' : '' }}>Order
-                                Won</option>
-                            <option value="Order Lost" {{ $lead->prospect_status == 'Order Lost' ? 'selected' : '' }}>Order
-                                Lost</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Secondary Status</label>
-                        <select name="calling_status"
-                            class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                            <option value="">None</option>
-                            <option value="Call Answered" {{ $lead->calling_status == 'Call Answered' ? 'selected' : '' }}>
-                                Call Answered</option>
-                            <option value="Busy / Callback" {{ $lead->calling_status == 'Busy / Callback' ? 'selected' : '' }}>Busy / Callback</option>
-                            <option value="Not Answered" {{ $lead->calling_status == 'Not Answered' ? 'selected' : '' }}>
-                                Not
-                                Answered</option>
-                            <option value="Interested" {{ $lead->calling_status == 'Interested' ? 'selected' : '' }}>
-                                Interested</option>
-                            <option value="Not Interested" {{ $lead->calling_status == 'Not Interested' ? 'selected' : '' }}>
-                                Not Interested</option>
-                            <option value="Switched Off" {{ $lead->calling_status == 'Switched Off' ? 'selected' : '' }}>
-                                Switched Off</option>
-                            <option value="Wrong Number" {{ $lead->calling_status == 'Wrong Number' ? 'selected' : '' }}>
-                                Wrong
-                                Number</option>
                         </select>
                     </div>
                 </div>
