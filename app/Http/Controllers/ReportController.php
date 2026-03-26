@@ -15,25 +15,45 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         try {
+            $tab = $request->get('tab', 'attendance');
             $users = User::all();
-            $query = Attendance::with(['user', 'loginSessions']);
 
+            if ($tab === 'follow_ups') {
+                $user = \Illuminate\Support\Facades\Auth::user();
+                $query = \App\Models\LeadFollowUp::whereNotNull('next_follow_up_date')
+                    ->where('next_follow_up_date', '>=', \Carbon\Carbon::now()->startOfDay())
+                    ->with(['lead', 'user']);
+
+                if (!$user->isAdmin() && !$user->hasRole('manager')) {
+                    $query->whereHas('lead', function ($q) use ($user) {
+                        $q->where('assigned_to', $user->id);
+                    });
+                }
+
+                $followUps = $query->orderBy('next_follow_up_date', 'asc')->get();
+                $groupedFollowUps = $followUps->unique('lead_id')->groupBy(function ($item) {
+                    return $item->lead->assignedUser->id ?? 0;
+                });
+
+                return view('admin.reports.index', compact('groupedFollowUps', 'users', 'tab'));
+            }
+
+            // Default: Attendance Audit
+            $query = Attendance::with(['user', 'loginSessions']);
             if ($request->user_id) {
                 $query->where('user_id', $request->user_id);
             }
-
             if ($request->from_date) {
                 $query->where('date', '>=', $request->from_date);
             }
-
             if ($request->to_date) {
                 $query->where('date', '<=', $request->to_date);
             }
 
             $attendances = $query->latest()->paginate(20)->withQueryString();
-
-            return view('admin.reports.index', compact('attendances', 'users'));
+            return view('admin.reports.index', compact('attendances', 'users', 'tab'));
         } catch (\Exception $e) {
+            \Log::error('Report error: ' . $e->getMessage());
             return back()->with('error', 'Failed to load report data.');
         }
     }

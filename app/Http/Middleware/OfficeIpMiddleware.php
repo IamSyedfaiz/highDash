@@ -14,6 +14,11 @@ class OfficeIpMiddleware
         $currentIp = $request->ip();
         $ipFile = storage_path('app/office_ip.txt');
 
+        // Always allow localhost/local loopback
+        if ($currentIp === $ipFile) {
+            return $next($request);
+        }
+
         if (!file_exists($ipFile)) {
             file_put_contents($ipFile, $currentIp);
         }
