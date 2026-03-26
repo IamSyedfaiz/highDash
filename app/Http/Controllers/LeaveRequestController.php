@@ -10,13 +10,32 @@ use Carbon\Carbon;
 
 class LeaveRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = Auth::user();
             if ($user->isAdmin()) {
-                $leaves = LeaveRequest::with('user')->latest()->get();
-                return view('admin.leaves.index', compact('leaves'));
+                $query = LeaveRequest::with('user')->latest();
+
+                if ($request->has('user_id') && $request->user_id) {
+                    $query->where('user_id', $request->user_id);
+                }
+
+                if ($request->has('date') && $request->date) {
+                    $query->whereDate('from_date', '<=', $request->date)
+                        ->whereDate('to_date', '>=', $request->date);
+                }
+
+                if ($request->has('role_id') && $request->role_id) {
+                    $query->whereHas('user.roles', function ($q) use ($request) {
+                        $q->where('roles.id', $request->role_id);
+                    });
+                }
+
+                $leaves = $query->paginate(20)->withQueryString();
+                $users = \App\Models\User::orderBy('name')->get();
+                $roles = \App\Models\Role::all();
+                return view('admin.leaves.index', compact('leaves', 'users', 'roles'));
             }
 
             $leaves = LeaveRequest::where('user_id', $user->id)->latest()->get();
@@ -62,6 +81,14 @@ class LeaveRequestController extends Controller
                 'model_id' => $leave->id,
             ]);
 
+            $adminUser = \App\Models\User::whereHas('roles', function ($q) {
+                $q->where('slug', 'admin'); })->first();
+            $adminEmail = $adminUser ? $adminUser->email : config('mail.from.address');
+
+            if ($adminEmail) {
+                \Illuminate\Support\Facades\Mail::to($adminEmail)->send(new \App\Mail\LeaveRequestedMail($leave));
+            }
+
             return redirect()->route('leaves.index')->with('success', 'Leave request submitted successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -90,6 +117,10 @@ class LeaveRequestController extends Controller
                 'model_type' => LeaveRequest::class,
                 'model_id' => $leave->id,
             ]);
+
+            if ($leave->user->email) {
+                \Illuminate\Support\Facades\Mail::to($leave->user->email)->send(new \App\Mail\LeaveStatusUpdatedMail($leave));
+            }
 
             return redirect()->back()->with('success', 'Leave status updated successfully.');
         } catch (\Exception $e) {

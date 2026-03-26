@@ -30,7 +30,7 @@ class LeadAllocationController extends Controller
             $unassignedLeads = $query->latest()->paginate(20)->withQueryString();
 
             $callingUsers = User::whereHas('roles', function ($q) {
-                $q->where('slug', 'calling');
+                $q->whereIn('slug', ['sales', 'inside_sales', 'field_sales']);
             })->withCount('leads')->get();
 
             $recentlyAssigned = Lead::whereNotNull('assigned_to')

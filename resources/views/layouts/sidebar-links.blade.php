@@ -19,7 +19,7 @@
     </a>
 </li>
 
-@if(!Auth::user()->hasRole('technical') || Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+@if (!Auth::user()->hasRole('technical') || Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
         <a href="{{ route('leads.index') }}"
             class="{{ request()->routeIs('leads.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
@@ -30,19 +30,18 @@
             Lead Management
         </a>
     </li>
+
+    <li>
+        <a href="{{ route('leads.create') }}"
+            class="{{ request()->routeIs('leads.create') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200 tracking-tight">
+            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Add Lead
+        </a>
+    </li>
 @endif
-
-<li>
-    <a href="{{ route('leads.create') }}"
-        class="{{ request()->routeIs('leads.create') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200 tracking-tight">
-        <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        Add Lead
-    </a>
-</li>
-
-@if(!Auth::user()->hasRole('calling') || Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+@if (!Auth::user()->hasRole('calling') || Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
         <a href="{{ route('tasks.index') }}"
             class="{{ request()->routeIs('tasks.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
@@ -55,7 +54,11 @@
     </li>
 @endif
 
-@if((Auth::user()->hasRole('calling') || Auth::user()->hasRole('technical')) && !Auth::user()->isAdmin() && !Auth::user()->hasRole('manager'))
+@if (
+        (Auth::user()->hasRole('calling') || Auth::user()->hasRole('technical')) &&
+        !Auth::user()->isAdmin() &&
+        !Auth::user()->hasRole('manager')
+    )
     <li>
         <a href="{{ route('performance.index') }}"
             class="{{ request()->routeIs('performance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
@@ -68,9 +71,10 @@
     </li>
 @endif
 
-@if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+@if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
-        <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">Administration
+        <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">
+            Administration
         </div>
         <ul role="list" class="-mx-2 space-y-1">
             <li>
@@ -117,9 +121,10 @@
     </li>
 @endif
 
-@if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+@if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
-        <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">Reports</div>
+        <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">Reports
+        </div>
         <ul role="list" class="-mx-2 space-y-1">
             <li>
                 <a href="{{ route('admin.reports.index') }}"
@@ -132,15 +137,66 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('follow_ups.index') }}"
+                    class="{{ request()->routeIs('follow_ups.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Follow Ups
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('performance.index') }}"
                     class="{{ request()->routeIs('performance.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
                     </svg>
-                    Performance Analytics
+                    Activity Report
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.holidays.index') }}"
+                    class="{{ request()->routeIs('admin.holidays.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                    </svg>
+                    Holidays
                 </a>
             </li>
         </ul>
     </li>
 @endif
+
+<li class="mt-8">
+    <div
+        class="text-[10px] font-black leading-6 text-slate-400 px-3 uppercase tracking-widest mb-2 flex items-center justify-between">
+        <span>Upcoming Holidays</span>
+        <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+    </div>
+    @php
+        $upcomingHolidays = \App\Models\Holiday::where('date', '>=', now())->orderBy('date')->take(5)->get();
+    @endphp
+    @if ($upcomingHolidays->count() > 0)
+        <ul role="list" class="-mx-2 space-y-2 px-2">
+            @foreach ($upcomingHolidays as $hol)
+                <li
+                    class="bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl p-3 border border-indigo-100 dark:border-indigo-800 backdrop-blur-sm">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-black text-indigo-900 dark:text-indigo-100">{{ $hol->title }}</span>
+                        <span
+                            class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400">{{ \Carbon\Carbon::parse($hol->date)->format('M d, Y') }}
+                            &middot; {{ $hol->locations }}</span>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    @else
+        <div class="px-3 text-xs text-slate-400 font-medium italic">No upcoming holidays.</div>
+    @endif
+</li>

@@ -37,7 +37,7 @@
                 {{ floor($attendances->sum('work_duration_minutes') / 60) }}h {{ $attendances->sum('work_duration_minutes') % 60 }}m
             </h3>
         </div>
-        @if($user->hasRole('calling'))
+        @if($user->hasRole(['sales', 'inside_sales', 'field_sales']))
         <div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl border-l-4 border-l-emerald-500">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Leads Captured</p>
             <h3 class="text-3xl font-black text-slate-900 dark:text-white leading-none">{{ $leads->count() }}</h3>
@@ -107,10 +107,10 @@
     <div class="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
         <div class="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
             <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                {{ $user->hasRole('calling') ? 'Lead Pipeline Record' : 'Technical Task History' }}
+                {{ $user->hasRole(['sales', 'inside_sales', 'field_sales']) ? 'Lead Pipeline Record' : 'Technical Task History' }}
             </h3>
             <div class="flex gap-2">
-                @if($user->hasRole('calling'))
+                @if($user->hasRole(['sales', 'inside_sales', 'field_sales']))
                     <a href="{{ route('admin.reports.export.leads', ['user_id' => $user->id]) }}" class="px-6 py-3 bg-emerald-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all">Export Leads</a>
                 @else
                     <a href="{{ route('admin.reports.export.tasks', ['user_id' => $user->id]) }}" class="px-6 py-3 bg-indigo-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-indigo-500/20 hover:scale-105 transition-all">Export Tasks</a>
@@ -121,7 +121,7 @@
             <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-800">
                 <thead class="bg-slate-50/50 dark:bg-slate-800/50">
                     <tr>
-                        @if($user->hasRole('calling'))
+                        @if($user->hasRole(['sales', 'inside_sales', 'field_sales']))
                             <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Company</th>
                             <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                             <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
@@ -133,7 +133,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
-                    @if($user->hasRole('calling'))
+                    @if($user->hasRole(['sales', 'inside_sales', 'field_sales']))
                         @foreach($leads as $lead)
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-indigo-900/5 transition-colors">
                             <td class="px-8 py-6">

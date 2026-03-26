@@ -3,8 +3,38 @@
 @section('title', 'Manage Leaves')
 
 @section('content')
-    <div class="mb-8 font-bold text-2xl text-slate-900 line-clamp-1">
-        Manage Leave Requests
+    <div class="mb-10 flex justify-between items-end border-b border-slate-100 pb-8">
+        <div>
+            <h1 class="text-3xl font-black text-slate-900 uppercase tracking-tight">MANAGE LEAVE REQUESTS</h1>
+            <p class="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Review and update employee leave
+                applications</p>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <form method="GET" action="{{ route('admin.leaves.index') }}" class="flex gap-3 text-sm font-normal items-center">
+            <input type="date" name="date" value="{{ request('date') }}" class="rounded-xl border-slate-200">
+            <select name="role_id" class="rounded-xl border-slate-200">
+                <option value="">All Roles</option>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+            <select name="user_id" class="rounded-xl border-slate-200">
+                <option value="">All Users</option>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}
+                    </option>
+                @endforeach
+            </select>
+            <button type="submit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700">Filter</button>
+            @if(request()->hasAny(['date', 'role_id', 'user_id']))
+                <a href="{{ route('admin.leaves.index') }}"
+                    class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300">Clear</a>
+            @endif
+        </form>
     </div>
 
     <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-slate-100">
@@ -42,7 +72,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="px-2.5 py-0.5 rounded-full text-xs font-semibold 
-                                    {{ $leave->status === 'approved' ? 'bg-emerald-100 text-emerald-800' : ($leave->status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
+                                                            {{ $leave->status === 'approved' ? 'bg-emerald-100 text-emerald-800' : ($leave->status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
                                     {{ ucfirst($leave->status) }}
                                 </span>
                             </td>

@@ -38,6 +38,32 @@ class ReportController extends Controller
         }
     }
 
+    public function followUpsReport(Request $request)
+    {
+        try {
+            $user = \Illuminate\Support\Facades\Auth::user();
+
+            $query = \App\Models\LeadFollowUp::whereNotNull('next_follow_up_date')
+                ->where('next_follow_up_date', '>=', \Carbon\Carbon::now()->startOfDay())
+                ->with(['lead', 'user']);
+
+            if (!$user->isAdmin() && !$user->hasRole('manager')) {
+                $query->whereHas('lead', function ($q) use ($user) {
+                    $q->where('assigned_to', $user->id);
+                });
+            }
+
+            $followUps = $query->orderBy('next_follow_up_date', 'asc')->get();
+            $groupedFollowUps = $followUps->unique('lead_id')->groupBy(function ($item) {
+                return $item->lead->assignedUser->id ?? 0;
+            });
+
+            return view('reports.follow_ups', compact('groupedFollowUps'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to load follow ups report.');
+        }
+    }
+
     public function userPerformance(User $user, Request $request)
     {
         try {
@@ -68,40 +94,63 @@ class ReportController extends Controller
     public function export(Request $request)
     {
         try {
-            $query = Attendance::with('user');
-            if ($request->user_id)
-                $query->where('user_id', $request->user_id);
-            if ($request->from_date)
-                $query->where('date', '>=', $request->from_date);
-            if ($request->to_date)
-                $query->where('date', '<=', $request->to_date);
+            $from = $request->from_date ? Carbon::parse($request->from_date) : Carbon::now()->startOfMonth();
+            $to = $request->to_date ? Carbon::parse($request->to_date) : Carbon::now();
 
-            $attendances = $query->get();
-            $filename = "attendance_report_" . date('Y-m-d') . ".csv";
+            $usersQuery = User::query();
+            if ($request->user_id) {
+                $usersQuery->where('id', $request->user_id);
+            }
+            $users = $usersQuery->get();
 
-            if ($request->format === 'pdf') {
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reports.attendance_pdf', compact('attendances'));
-                return $pdf->download("attendance_report_" . date('Y-m-d') . ".pdf");
+            // Build Dates Range
+            $dates = [];
+            for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
+                $dates[$d->format('Y-m-d')] = $d->copy();
             }
 
-            return response()->streamDownload(function () use ($attendances) {
-                $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['User', 'Date', 'Clock In', 'Clock Out', 'Duration (Min)', 'Status']);
-                foreach ($attendances as $row) {
-                    $minutes = $this->calculateMinutes($row);
-                    $status = ($minutes >= 420) ? 'Full Day' : 'Half Day';
-                    fputcsv($handle, [
-                        $row->user->name,
-                        $row->date instanceof Carbon ? $row->date->format('Y-m-d') : $row->date,
-                        $row->login_at?->setTimezone('Asia/Kolkata')->format('h:i:s A') ?? '-',
-                        $row->logout_at?->setTimezone('Asia/Kolkata')->format('h:i:s A') ?? '-',
-                        $minutes,
-                        $status
-                    ]);
+            // Fetch Holidays
+            $holidays = \App\Models\Holiday::whereBetween('date', [$from->format('Y-m-d'), $to->format('Y-m-d')])->get();
+
+            // Fetch Attendances
+            $attRecords = Attendance::whereIn('user_id', $users->pluck('id'))
+                ->whereBetween('date', [$from->format('Y-m-d'), $to->format('Y-m-d')])
+                ->get();
+
+            $attendances = [];
+            foreach ($attRecords as $a) {
+                $dateKey = $a->date instanceof Carbon ? $a->date->format('Y-m-d') : Carbon::parse($a->date)->format('Y-m-d');
+                $attendances[$a->user_id][$dateKey] = $a;
+            }
+
+            // Fetch Leaves
+            $leaveRecords = \App\Models\LeaveRequest::whereIn('user_id', $users->pluck('id'))
+                ->where('status', 'approved')
+                ->where(function ($q) use ($from, $to) {
+                    $q->whereBetween('from_date', [$from->format('Y-m-d'), $to->format('Y-m-d')])
+                        ->orWhereBetween('to_date', [$from->format('Y-m-d'), $to->format('Y-m-d')]);
+                })->get();
+
+            $leaves = [];
+            foreach ($leaveRecords as $lr) {
+                $start = Carbon::parse($lr->from_date);
+                $end = Carbon::parse($lr->to_date);
+                for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                    $leaves[$lr->user_id][$d->format('Y-m-d')] = $lr;
                 }
-                fclose($handle);
-            }, $filename, ['Content-Type' => 'text/csv']);
+            }
+
+            $data = compact('users', 'dates', 'holidays', 'attendances', 'leaves');
+            $filenamePrefix = "attendance_matrix_report_" . date('Y-m-d');
+
+            if ($request->format === 'pdf') {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reports.attendance_matrix', $data)->setPaper('a4', 'landscape');
+                return $pdf->download($filenamePrefix . ".pdf");
+            }
+
+            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\AttendanceMatrixExport($data), $filenamePrefix . '.xlsx');
         } catch (\Exception $e) {
+            \Log::error('Export failed: ' . $e->getMessage());
             return back()->with('error', 'Export failed.');
         }
     }

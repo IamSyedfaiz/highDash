@@ -15,6 +15,7 @@ class Task extends Model
         'title',
         'description',
         'url',
+        'urls',
         'status',
         'task_date',
         'started_at',
@@ -23,6 +24,7 @@ class Task extends Model
 
     protected $casts = [
         'task_date' => 'date',
+        'urls' => 'array',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];

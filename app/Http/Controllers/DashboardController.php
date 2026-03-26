@@ -39,7 +39,7 @@ class DashboardController extends Controller
                 'droppedLeads' => Lead::where('status', 'Drop')->count(),
                 'recentActivities' => ActivityLog::with('user')->latest()->take(10)->get(),
                 'leadStats' => Lead::selectRaw('status, count(*) as count')->groupBy('status')->get(),
-                'topAgents' => User::whereHas('roles', fn($q) => $q->where('slug', 'calling'))
+                'topAgents' => User::whereHas('roles', fn($q) => $q->whereIn('slug', ['sales', 'inside_sales', 'field_sales']))
                     ->withCount(['leads' => fn($q) => $q->where('status', 'Existing')])
                     ->orderBy('leads_count', 'desc')->take(5)->get(),
             ];

@@ -159,7 +159,7 @@
     @else
         <!-- Individual User View -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            @if(Auth::user()->hasRole('calling') && isset($callingStats[0]))
+            @if(Auth::user()->hasRole(['sales', 'inside_sales', 'field_sales']) && isset($callingStats[0]))
                 @php $stat = $callingStats[0]; @endphp
                 <div
                     class="bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-2xl border border-slate-100 dark:border-slate-800">

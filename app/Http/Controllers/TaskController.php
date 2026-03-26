@@ -42,36 +42,62 @@ class TaskController extends Controller
         }
     }
 
+    public function create()
+    {
+        try {
+            $users = User::all();
+            return view('tasks.create', compact('users'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Unable to open task creation form.');
+        }
+    }
+
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'url' => 'nullable|url',
                 'user_id' => 'nullable|exists:users,id',
                 'task_date' => 'nullable|date',
+                'tasks' => 'required|array|min:1',
+                'tasks.*.title' => 'required|string|max:255',
+                'tasks.*.description' => 'nullable|string',
+                'tasks.*.urls' => 'nullable|array',
+                'tasks.*.urls.*' => 'nullable|url',
             ]);
 
-            $task = Task::create([
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'url' => $validated['url'],
-                'task_date' => $validated['task_date'] ?? now()->format('Y-m-d'),
-                'user_id' => $validated['user_id'] ?? Auth::id(),
-                'created_by' => Auth::id(),
-                'status' => 'pending',
-            ]);
+            $commonDate = $validated['task_date'] ?? now()->format('Y-m-d');
+            $userId = $validated['user_id'] ?? Auth::id();
 
-            ActivityLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'task_created',
-                'description' => 'Created task: ' . $task->title,
-                'model_type' => Task::class,
-                'model_id' => $task->id,
-            ]);
+            $createdTasks = [];
 
-            return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
+            foreach ($validated['tasks'] as $taskData) {
+                // Filter out empty urls
+                $urls = isset($taskData['urls']) ? array_filter($taskData['urls']) : [];
+                $urls = array_values($urls);
+
+                $task = Task::create([
+                    'title' => $taskData['title'],
+                    'description' => $taskData['description'] ?? null,
+                    'url' => (!empty($urls) ? $urls[0] : null), // Fallback support
+                    'urls' => $urls,
+                    'task_date' => $commonDate,
+                    'user_id' => $userId,
+                    'created_by' => Auth::id(),
+                    'status' => 'pending',
+                ]);
+
+                $createdTasks[] = $task;
+
+                ActivityLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'task_created',
+                    'description' => 'Created task: ' . $task->title,
+                    'model_type' => Task::class,
+                    'model_id' => $task->id,
+                ]);
+            }
+
+            return redirect()->route('tasks.index')->with('success', count($createdTasks) . ' task(s) created successfully.');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Failed to create task.');
         }
@@ -113,7 +139,7 @@ class TaskController extends Controller
             $task->update($data);
 
             $description = 'Updated task "' . $task->title . '" status to ' . strtoupper($validated['status']);
-            if ($validated['comment']) {
+            if (isset($validated['comment']) && $validated['comment']) {
                 $description .= ". Progress Log: " . $validated['comment'];
             }
 
