@@ -15,15 +15,14 @@ class OfficeIpMiddleware
         $ipFile = storage_path('app/office_ip.txt');
 
         // Always allow localhost/local loopback
-        if ($currentIp === $ipFile) {
+        $allowedIp = trim(file_get_contents($ipFile));
+        if ($currentIp === $allowedIp) {
             return $next($request);
         }
 
         if (!file_exists($ipFile)) {
             file_put_contents($ipFile, $currentIp);
         }
-
-        $allowedIp = trim(file_get_contents($ipFile));
 
         if ($currentIp !== $allowedIp) {
             return response(view('errors.wrong_network'));
