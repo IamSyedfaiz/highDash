@@ -44,7 +44,13 @@ class OfficeIpMiddleware
         }
 
         // 4. Checking logic
-        if (in_array($currentIp, $trustedIps) || $currentIp === $allowedIp || str_starts_with($currentIp, '10.') || str_starts_with($currentIp, '192.168.')) {
+        if (
+            in_array($currentIp, $trustedIps) ||
+            $currentIp === $allowedIp ||
+            str_starts_with($currentIp, '10.') ||
+            str_starts_with($currentIp, '192.168.') ||
+            str_starts_with($currentIp, '106.219.') // Allow dynamic IPs from the office ISP subnet
+        ) {
             \Log::info("OfficeIpMiddleware - IP Allowed (Trusted or Matched)");
             return $next($request);
         }
