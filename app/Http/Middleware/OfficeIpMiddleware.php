@@ -11,23 +11,42 @@ class OfficeIpMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $currentIp = $request->ip();
-        $ipFile = storage_path('app/office_ip.txt');
+        // 1. Get the TRUE client IP (handling proxies/load balancers on live server)
+        $currentIp = $request->server('HTTP_CF_CONNECTING_IP') ??
+            $request->server('HTTP_X_FORWARDED_FOR') ??
+            $request->ip();
 
-        // Always allow localhost/local loopback
-        $allowedIp = trim(file_get_contents($ipFile));
-        if ($currentIp === $allowedIp) {
+        // Handle multiple IPs in X-Forwarded-For (take the first one)
+        if (strpos($currentIp, ',') !== false) {
+            $currentIp = trim(explode(',', $currentIp)[0]);
+        }
+
+        // 2. Safely read allowed IP from file
+        $ipFile = storage_path('app/office_ip.txt');
+        $allowedIp = '';
+        if (file_exists($ipFile)) {
+            $allowedIp = trim(file_get_contents($ipFile));
+        }
+
+        // 3. Define globally trusted IPs (Localhost / Server IP)
+        $trustedIps = [
+            '127.0.0.1',
+            '::1',
+            '106.219.162.135' // The specific server IP the user mentioned
+        ];
+
+        // 4. Checking logic
+        if (in_array($currentIp, $trustedIps) || $currentIp === $allowedIp) {
             return $next($request);
         }
 
-        if (!file_exists($ipFile)) {
+        // If file is empty or doesn't exist, register the first untrusted IP that hits it
+        if (empty($allowedIp)) {
             file_put_contents($ipFile, $currentIp);
+            return $next($request);
         }
 
-        if ($currentIp !== $allowedIp) {
-            return response(view('errors.wrong_network'));
-        }
-
-        return $next($request);
+        // 5. Block access
+        return response(view('errors.wrong_network'));
     }
 }
