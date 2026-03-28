@@ -49,7 +49,8 @@ class OfficeIpMiddleware
             $currentIp === $allowedIp ||
             str_starts_with($currentIp, '10.') ||
             str_starts_with($currentIp, '192.168.') ||
-            str_starts_with($currentIp, '106.219.') // Allow dynamic IPs from the office ISP subnet
+            str_starts_with($currentIp, '106.219.') || // Allow dynamic IPs from the office ISP subnet (IPv4)
+            str_starts_with($currentIp, '2401:4900:')   // Allow dynamic IPs from Jio Network (IPv6)
         ) {
             \Log::info("OfficeIpMiddleware - IP Allowed (Trusted or Matched)");
             return $next($request);
