@@ -176,6 +176,68 @@
     </div>
     @else
     <!-- Follow Ups Tab -->
+    <!-- Filters for Follow Ups -->
+    <div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl mb-10">
+        <form action="{{ route('admin.reports.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <input type="hidden" name="tab" value="follow_ups">
+            @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Team Member</label>
+                <select name="f_user_id" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-bold">
+                    <option value="">All Employees</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" {{ request('f_user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Time Range</label>
+                <select name="f_date_range" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-bold">
+                    <option value="all" {{ request('f_date_range') == 'all' ? 'selected' : '' }}>All Time</option>
+                    <option value="today" {{ request('f_date_range') == 'today' ? 'selected' : '' }}>Today</option>
+                    <option value="yesterday" {{ request('f_date_range') == 'yesterday' ? 'selected' : '' }}>Yesterday</option>
+                    <option value="this_week" {{ request('f_date_range') == 'this_week' ? 'selected' : '' }}>This Week</option>
+                    <option value="last_week" {{ request('f_date_range') == 'last_week' ? 'selected' : '' }}>Last Week</option>
+                    <option value="this_month" {{ request('f_date_range') == 'this_month' ? 'selected' : '' }}>This Month</option>
+                    <option value="last_month" {{ request('f_date_range') == 'last_month' ? 'selected' : '' }}>Last Month</option>
+                </select>
+            </div>
+            <div class="flex gap-2 h-full items-end pb-1 md:col-span-2">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all uppercase tracking-widest text-xs font-black">
+                    Filter Activity
+                </button>
+                <a href="{{ route('admin.reports.index', ['tab' => 'follow_ups']) }}" class="bg-slate-100 dark:bg-slate-800 text-slate-500 p-3 rounded-2xl hover:bg-slate-200 transition-all">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Active Totals Summary across all users filtered -->
+    @php
+        $globalTotal = 0; $globalCbPostPg = 0; $globalVideoPg = 0;
+        foreach($groupedFollowUps as $id => $fups) {
+            $globalTotal += $fups->count();
+            $globalCbPostPg += $fups->where('status', 'CB_POST PG')->count();
+            $globalVideoPg += $fups->where('status', 'VIDEO PG')->count();
+        }
+    @endphp
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+            <span class="block text-xs font-black text-slate-400 uppercase tracking-widest">Total Activities</span>
+            <span class="block text-4xl font-extrabold text-indigo-600 mt-2">{{ $globalTotal }}</span>
+        </div>
+        <div class="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+            <span class="block text-xs font-black text-slate-400 uppercase tracking-widest">Total <span class="text-rose-500">CB_POST PG</span></span>
+            <span class="block text-4xl font-extrabold text-rose-600 mt-2">{{ $globalCbPostPg }}</span>
+        </div>
+        <div class="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+            <span class="block text-xs font-black text-slate-400 uppercase tracking-widest">Total <span class="text-emerald-500">VIDEO PG</span></span>
+            <span class="block text-4xl font-extrabold text-emerald-600 mt-2">{{ $globalVideoPg }}</span>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($groupedFollowUps as $userId => $userFollowUps)
             @php
@@ -196,17 +258,33 @@
                     </div>
                 </div>
 
-                <div class="flex-1 mt-6 border-t border-slate-100 dark:border-slate-800 pt-6">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Follow Up Breakdown</h4>
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="flex-1 mt-6 border-t border-slate-100 dark:border-slate-800 pt-6 space-y-4">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Priority Breakdowns</h4>
+                    
+                    <!-- Special Status highlight tabs -->
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <div class="bg-rose-50 dark:bg-rose-900/20 p-3 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                            <span class="text-[10px] font-black tracking-widest text-rose-500 uppercase block mb-1">CB_POST PG</span>
+                            <span class="text-xl font-extrabold text-rose-700 dark:text-rose-400">{{ $statusCounts['CB_POST PG'] ?? 0 }}</span>
+                        </div>
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                            <span class="text-[10px] font-black tracking-widest text-emerald-500 uppercase block mb-1">VIDEO PG</span>
+                            <span class="text-xl font-extrabold text-emerald-700 dark:text-emerald-400">{{ $statusCounts['VIDEO PG'] ?? 0 }}</span>
+                        </div>
+                    </div>
+
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Other Statuses</h4>
+                    <div class="grid grid-cols-2 gap-2">
                         @foreach($statusCounts as $status => $count)
+                            @if(!in_array($status, ['CB_POST PG', 'VIDEO PG']))
                             <a href="{{ route('leads.index', ['assigned_to' => $assignedUser->id ?? 'none', 'follow_up_status' => $status]) }}" 
                                class="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition overflow-hidden group/link">
-                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 group-hover/link:text-indigo-600 dark:group-hover/link:text-indigo-400 block truncate" title="{{ $status }}">{{ $status }}</span>
-                                <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 group-hover/link:bg-indigo-100 dark:group-hover/link:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded text-[10px] font-black shadow-sm transition-colors ml-2">
+                                <span class="text-[9px] font-bold text-slate-600 dark:text-slate-400 group-hover/link:text-indigo-600 block truncate leading-tight w-3/4" title="{{ $status }}">{{ $status }}</span>
+                                <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 group-hover/link:bg-indigo-100 text-indigo-700 dark:text-indigo-400 rounded text-[9px] font-black w-1/4 text-center">
                                     {{ $count }}
                                 </span>
                             </a>
+                            @endif
                         @endforeach
                     </div>
                 </div>

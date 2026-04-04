@@ -54,6 +54,24 @@
                 </div>
             </div>
 
+            <!-- Performance Goals -->
+            <div
+                class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-8 space-y-6">
+                <h3
+                    class="text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    Performance Targets</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Target Amount (₹) for Calling
+                            Users</label>
+                        <input type="number" step="0.01" min="0" name="sales_target_amount"
+                            value="{{ old('sales_target_amount', 0) }}"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-bold">
+                    </div>
+                </div>
+            </div>
+
 
 
             <div

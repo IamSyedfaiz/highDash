@@ -49,7 +49,8 @@ class Lead extends Model
         'name',
         'designation',
         'add_distribution',
-        'keywords'
+        'keywords',
+        'converted_amount'
     ];
 
     public function assignedUser()
