@@ -144,14 +144,26 @@ class LeadController extends Controller
                 'address' => 'nullable|string',
                 'business_type' => 'required|in:Manufacturer,Supplier,Trader,Wholesaler,Importer,Exporter,Service Provider',
                 'lead_source' => 'nullable|string',
-                'status' => 'required|in:Pending,New Lead,Existing,Drop,Prospect,Approach,Negotiable,Order won',
+                'status' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $allowed = array_merge(
+                            ['New Lead', 'Existing', 'Drop', 'Order won'],
+                            \App\Models\Lead::STATUSES
+                        );
+                        if (!in_array($value, $allowed)) {
+                            $fail('The selected status is invalid.');
+                        }
+                    }
+                ],
+                'converted_amount' => 'nullable|numeric|min:0',
                 'prospect_status' => 'nullable|in:Approach,Negotiable,Order Won,Order Lost,None',
                 'calling_status' => 'nullable|in:Call Answered,Busy / Callback,Not Answered,Interested,Not Interested,Switched Off,Wrong Number',
                 'feedback' => 'nullable|string',
             ]);
 
             if ($validated['status'] === 'Drop') {
-                $validated['status'] = 'Pending';
                 $validated['assigned_to'] = null;
                 $lead->assigned_to = null;
             }
@@ -182,14 +194,26 @@ class LeadController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => 'required|in:Pending,New Lead,Existing,Drop,Prospect,Approach,Negotiable,Order won',
+                'status' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $allowed = array_merge(
+                            ['New Lead', 'Existing', 'Drop', 'Order won'],
+                            \App\Models\Lead::STATUSES
+                        );
+                        if (!in_array($value, $allowed)) {
+                            $fail('The selected status is invalid.');
+                        }
+                    }
+                ],
+                'converted_amount' => 'nullable|numeric|min:0',
                 'prospect_status' => 'nullable|in:Approach,Negotiable,Order Won,Order Lost,None',
                 'calling_status' => 'required|in:Call Answered,Busy / Callback,Not Answered,Interested,Not Interested,Switched Off,Wrong Number',
                 'feedback' => 'nullable|string',
             ]);
 
             if ($validated['status'] === 'Drop') {
-                $validated['status'] = 'Pending';
                 $lead->assigned_to = null;
             }
 

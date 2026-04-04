@@ -39,6 +39,7 @@ class UserController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
                 'roles' => ['required', 'array'],
+                'sales_target_amount' => ['nullable', 'numeric', 'min:0'],
             ]);
 
             $randomPassword = \Illuminate\Support\Str::random(10); // Auto-generate secure password
@@ -47,6 +48,7 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($randomPassword),
+                'sales_target_amount' => $request->sales_target_amount ?? 0,
             ]);
 
             $user->roles()->attach($request->roles);
@@ -94,11 +96,13 @@ class UserController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
                 'roles' => ['required', 'array'],
+                'sales_target_amount' => ['nullable', 'numeric', 'min:0'],
             ]);
 
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
+                'sales_target_amount' => $request->sales_target_amount ?? 0,
             ]);
 
             if ($request->filled('password')) {

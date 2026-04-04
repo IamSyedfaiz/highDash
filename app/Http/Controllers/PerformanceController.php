@@ -20,45 +20,71 @@ class PerformanceController extends Controller
         $month = $request->month ?? now()->month;
         $year = $request->year ?? now()->year;
 
-        // Calling Team Data (Leads)
-        $callingStats = [];
-        if ($isAdmin || $user->hasRole(['sales', 'inside_sales', 'field_sales'])) {
-            $callingQuery = User::whereHas('roles', function ($q) {
-                $q->whereIn('slug', ['sales', 'inside_sales', 'field_sales']);
+        // Inside Sales Team Data (Leads)
+        $insideSalesStats = [];
+        if ($isAdmin || $user->hasRole(['sales', 'inside_sales'])) {
+            $insideQuery = User::whereHas('roles', function ($q) {
+                $q->whereIn('slug', ['sales', 'inside_sales']);
             });
 
             if (!$isAdmin) {
-                $callingQuery->where('id', $user->id);
+                $insideQuery->where('id', $user->id);
             }
 
-            $callingUsers = $callingQuery->withCount([
-                'leads' => function ($q) use ($month, $year) {
-                    $q->whereMonth('created_at', $month)->whereYear('created_at', $year);
-                }
-            ])->get();
+            $callingUsers = $insideQuery
+                ->withCount([
+                    'leads' => function ($q) use ($month, $year) {
+                        $q->whereMonth('created_at', $month)->whereYear('created_at', $year);
+                    },
+                ])
+                ->get();
 
             foreach ($callingUsers as $cu) {
-                $cuLeads = Lead::where('assigned_to', $cu->id)
-                    ->whereMonth('created_at', $month)
-                    ->whereYear('created_at', $year)
-                    ->select('status', 'prospect_status', DB::raw('count(*) as count'))
-                    ->groupBy('status', 'prospect_status')
-                    ->get();
+                $cuLeads = Lead::where('assigned_to', $cu->id)->whereMonth('created_at', $month)->whereYear('created_at', $year)->select('status', 'prospect_status', DB::raw('count(*) as count'))->groupBy('status', 'prospect_status')->get();
 
-                $untouchedLeadsCount = Lead::where('assigned_to', $cu->id)
-                    ->whereMonth('created_at', $month)
-                    ->whereYear('created_at', $year)
-                    ->doesntHave('followUps')
-                    ->count();
+                $untouchedLeadsCount = Lead::where('assigned_to', $cu->id)->whereMonth('created_at', $month)->whereYear('created_at', $year)->doesntHave('followUps')->count();
 
-                $cuStats = [
+                $insideSalesStats[] = [
                     'user' => $cu,
                     'total' => $cu->leads_count,
                     'untouched' => $untouchedLeadsCount,
                     'by_status' => $cuLeads->groupBy('status')->map->sum('count'),
                     'by_prospect' => $cuLeads->groupBy('prospect_status')->map->sum('count'),
                 ];
-                $callingStats[] = $cuStats;
+            }
+        }
+
+        // Field Sales Team Data (Leads)
+        $fieldSalesStats = [];
+        if ($isAdmin || $user->hasRole(['field_sales'])) {
+            $fieldQuery = User::whereHas('roles', function ($q) {
+                $q->where('slug', 'field_sales');
+            });
+
+            if (!$isAdmin) {
+                $fieldQuery->where('id', $user->id);
+            }
+
+            $fieldUsers = $fieldQuery
+                ->withCount([
+                    'leads' => function ($q) use ($month, $year) {
+                        $q->whereMonth('created_at', $month)->whereYear('created_at', $year);
+                    },
+                ])
+                ->get();
+
+            foreach ($fieldUsers as $cu) {
+                $cuLeads = Lead::where('assigned_to', $cu->id)->whereMonth('created_at', $month)->whereYear('created_at', $year)->select('status', 'prospect_status', DB::raw('count(*) as count'))->groupBy('status', 'prospect_status')->get();
+
+                $untouchedLeadsCount = Lead::where('assigned_to', $cu->id)->whereMonth('created_at', $month)->whereYear('created_at', $year)->doesntHave('followUps')->count();
+
+                $fieldSalesStats[] = [
+                    'user' => $cu,
+                    'total' => $cu->leads_count,
+                    'untouched' => $untouchedLeadsCount,
+                    'by_status' => $cuLeads->groupBy('status')->map->sum('count'),
+                    'by_prospect' => $cuLeads->groupBy('prospect_status')->map->sum('count'),
+                ];
             }
         }
 
@@ -73,30 +99,30 @@ class PerformanceController extends Controller
                 $techQuery->where('id', $user->id);
             }
 
-            $techUsers = $techQuery->get();
+            $technicalUsers = $techQuery
+                ->withCount([
+                    'tasks' => function ($q) use ($month, $year) {
+                        $q->whereMonth('created_at', $month)->whereYear('created_at', $year);
+                    },
+                ])
+                ->get();
 
-            foreach ($techUsers as $tu) {
-                $tuTasks = Task::where('user_id', $tu->id)
-                    ->whereMonth('task_date', $month)
-                    ->whereYear('task_date', $year)
-                    ->select('status', DB::raw('count(*) as count'), 'task_date')
-                    ->groupBy('status', 'task_date')
-                    ->get();
+            foreach ($technicalUsers as $tu) {
+                $tuTasks = $tu->tasks()->whereMonth('created_at', $month)->whereYear('created_at', $year)->select('status', DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))->groupBy('status', 'date')->get();
 
-                $tuStats = [
+                $dailyActivity = $tuTasks->groupBy('date')->map(fn($dayTasks) => $dayTasks->sum('count'))->toArray();
+
+                $techStats[] = [
                     'user' => $tu,
-                    'total' => $tuTasks->sum('count'),
+                    'total' => $tu->tasks_count,
                     'by_status' => $tuTasks->groupBy('status')->map->sum('count'),
-                    'daily' => $tuTasks->groupBy(function ($item) {
-                        return $item->task_date->format('Y-m-d');
-                    })->map->sum('count')
+                    'daily' => $dailyActivity,
                 ];
-                $techStats[] = $tuStats;
             }
         }
 
         $allUsers = $isAdmin ? User::all() : collect([$user]);
 
-        return view('performance.index', compact('callingStats', 'techStats', 'isAdmin', 'allUsers', 'month', 'year'));
+        return view('performance.index', compact('insideSalesStats', 'fieldSalesStats', 'techStats', 'isAdmin', 'allUsers', 'month', 'year'));
     }
 }

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'sales_target_amount',
     ];
 
     /**
@@ -110,5 +111,10 @@ class User extends Authenticatable
     public function followUps()
     {
         return $this->hasMany(LeadFollowUp::class);
+    }
+
+    public function kras()
+    {
+        return $this->hasMany(Kra::class);
     }
 }

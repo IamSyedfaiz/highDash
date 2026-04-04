@@ -76,8 +76,8 @@
                         </select>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Company Website</label>
-                        <input type="url" name="lead_source" value="{{ old('lead_source', $lead->lead_source) }}"
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lead Source (Options)</label>
+                        <input type="text" name="lead_source" value="{{ old('lead_source', $lead->lead_source) }}"
                             class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
                     </div>
                 </div>
@@ -91,14 +91,26 @@
                     Internal Workflow</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Lead Source</label>
-                        <select name="status"
+                        <label class="text-xs font-bold text-indigo-500 uppercase ml-1">Lead Status</label>
+                        <select name="status" id="status_select"
                             class="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                            <option value="Pending" {{ $lead->status == 'Pending' ? 'selected' : '' }}>Pending</option>
                             <option value="New Lead" {{ $lead->status == 'New Lead' ? 'selected' : '' }}>New Lead</option>
                             <option value="Existing" {{ $lead->status == 'Existing' ? 'selected' : '' }}>Existing</option>
                             <option value="Drop" {{ $lead->status == 'Drop' ? 'selected' : '' }}>Drop (Unassign)</option>
+                            <option value="Order won" {{ $lead->status == 'Order won' ? 'selected' : '' }}>Order won</option>
+                            @foreach(\App\Models\Lead::STATUSES as $statusOpt)
+                                <option value="{{ $statusOpt }}" {{ $lead->status == $statusOpt ? 'selected' : '' }}>
+                                    {{ $statusOpt }}</option>
+                            @endforeach
                         </select>
+                    </div>
+
+                    <div class="space-y-1" id="amount_container">
+                        <label class="text-xs font-bold text-emerald-500 uppercase ml-1">Target Converted Amount (₹)</label>
+                        <input type="number" name="converted_amount" step="0.01" min="0"
+                            value="{{ old('converted_amount', $lead->converted_amount) }}"
+                            class="w-full bg-emerald-50 dark:bg-emerald-900/10 text-emerald-900 dark:text-emerald-100 border border-emerald-100 dark:border-emerald-800 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 shadow-sm"
+                            placeholder="Enter amount if lead closed...">
                     </div>
                 </div>
             </div>

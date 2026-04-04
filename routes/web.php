@@ -71,6 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggleActive');
         Route::get('users/{user}/attendance/{date}/lead-stats', [UserController::class, 'leadStats'])->name('users.attendance.leadStats');
         Route::resource('roles', RoleController::class);
+        Route::resource('kras', \App\Http\Controllers\Admin\KraController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::post('kras/{user}/update-target', [\App\Http\Controllers\Admin\KraController::class, 'updateTarget'])->name('kras.update_target');
         Route::resource('holidays', App\Http\Controllers\Admin\HolidayController::class)->only(['index', 'store', 'destroy']);
         Route::resource('leaves', LeaveRequestController::class);
 

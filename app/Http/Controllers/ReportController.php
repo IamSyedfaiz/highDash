@@ -20,18 +20,45 @@ class ReportController extends Controller
 
             if ($tab === 'follow_ups') {
                 $user = \Illuminate\Support\Facades\Auth::user();
-                $query = \App\Models\LeadFollowUp::whereNotNull('next_follow_up_date')
-                    ->where('next_follow_up_date', '>=', \Carbon\Carbon::now()->startOfDay())
-                    ->with(['lead', 'user']);
+                // Get the latest follow up per lead. We order by created_at desc first, then group by lead.
+                $query = \App\Models\LeadFollowUp::with(['lead', 'user'])
+                    ->orderBy('created_at', 'desc');
 
-                if (!$user->isAdmin() && !$user->hasRole('manager')) {
+                // Apply user filter if admin
+                if ($user->isAdmin() || $user->hasRole('manager')) {
+                    if ($request->f_user_id) {
+                        $query->whereHas('lead', function ($q) use ($request) {
+                            $q->where('assigned_to', $request->f_user_id);
+                        });
+                    }
+                } else {
                     $query->whereHas('lead', function ($q) use ($user) {
                         $q->where('assigned_to', $user->id);
                     });
                 }
 
-                $followUps = $query->orderBy('next_follow_up_date', 'asc')->get();
-                $groupedFollowUps = $followUps->unique('lead_id')->groupBy(function ($item) {
+                // Apply date filters
+                $dateFilter = $request->f_date_range ?? 'all';
+                if ($dateFilter === 'today') {
+                    $query->whereDate('created_at', \Carbon\Carbon::today());
+                } elseif ($dateFilter === 'yesterday') {
+                    $query->whereDate('created_at', \Carbon\Carbon::yesterday());
+                } elseif ($dateFilter === 'this_week') {
+                    $query->whereBetween('created_at', [\Carbon\Carbon::now()->startOfWeek(), \Carbon\Carbon::now()->endOfWeek()]);
+                } elseif ($dateFilter === 'last_week') {
+                    $query->whereBetween('created_at', [\Carbon\Carbon::now()->subWeek()->startOfWeek(), \Carbon\Carbon::now()->subWeek()->endOfWeek()]);
+                } elseif ($dateFilter === 'this_month') {
+                    $query->whereMonth('created_at', \Carbon\Carbon::now()->month)
+                        ->whereYear('created_at', \Carbon\Carbon::now()->year);
+                } elseif ($dateFilter === 'last_month') {
+                    $query->whereMonth('created_at', \Carbon\Carbon::now()->subMonth()->month)
+                        ->whereYear('created_at', \Carbon\Carbon::now()->subMonth()->year);
+                }
+
+                $followUps = $query->get();
+                $uniqueFollowUps = $followUps->unique('lead_id');
+
+                $groupedFollowUps = $uniqueFollowUps->groupBy(function ($item) {
                     return $item->lead->assignedUser->id ?? 0;
                 });
 
@@ -144,7 +171,7 @@ class ReportController extends Controller
             }
 
             // Fetch Leaves
-            $leaveRecords = \App\Models\LeaveRequest::whereIn('user_id', $users->pluck('id'))
+            $leaveRecords = \App\Models\LeaveRequest::query()->whereIn('user_id', $users->pluck('id'))
                 ->where('status', 'approved')
                 ->where(function ($q) use ($from, $to) {
                     $q->whereBetween('from_date', [$from->format('Y-m-d'), $to->format('Y-m-d')])
