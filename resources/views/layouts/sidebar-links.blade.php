@@ -71,6 +71,16 @@
     </li>
 @endif
 
+<li>
+    <a href="{{ route('suggestions.index') }}"
+        class="{{ request()->routeIs('suggestions.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }} group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200">
+        <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        Feedback Feed
+    </a>
+</li>
+
 @if (Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
     <li>
         <div class="text-xs font-semibold leading-6 text-slate-400 px-3 mt-4 mb-2 uppercase tracking-wider">
