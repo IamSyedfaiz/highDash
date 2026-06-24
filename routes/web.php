@@ -65,6 +65,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/follow-ups', [ReportController::class, 'followUpsReport'])->name('follow_ups.index');
     Route::resource('leaves', LeaveRequestController::class);
 
+    // Suggestions & Feedback (All Users)
+    Route::resource('suggestions', App\Http\Controllers\SuggestionController::class);
+    Route::post('suggestions/{suggestion}/comments', [App\Http\Controllers\SuggestionController::class, 'storeComment'])->name('suggestions.comments.store');
+    Route::post('suggestions/polls/{poll}/vote', [App\Http\Controllers\SuggestionController::class, 'votePoll'])->name('suggestions.polls.vote');
+
     // Admin Specific
     Route::middleware('role:admin,manager')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
